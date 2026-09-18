@@ -1,0 +1,10 @@
+process.env.NODE_ENV = "test";
+process.env.MONGO_URI = "mongodb://127.0.0.1:27017/saas_test";
+process.env.CORS_ORIGIN = "http://localhost:3000";
+process.env.APP_URL = "http://localhost:3000";
+process.env.COOKIE_SECRET = "test-secret";
+process.env.COOKIE_SECURE = "false";
+process.env.COOKIE_SAMESITE = "lax";
+process.env.LOG_LEVEL = "silent";
+process.env.SMTP_HOST = "127.0.0.1";
+process.env.SMTP_PORT = "1025";

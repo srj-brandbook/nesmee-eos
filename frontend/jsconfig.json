@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "form-engine": ["../shared/form-engine/index.js"]
+    }
+  }
+}
