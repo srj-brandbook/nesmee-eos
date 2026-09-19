@@ -37,7 +37,7 @@ function LoginForm() {
     <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4">
       <div>
         <h1 className="font-display text-2xl font-semibold">Welcome back</h1>
-        <p className="mt-1 text-sm text-muted">Sign in to the dashboard.</p>
+        <p className="mt-1 text-sm text-muted">Sign in to your export workspace.</p>
       </div>
       {error ? <Alert variant="danger">{error}</Alert> : null}
       <Input label="Email" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />

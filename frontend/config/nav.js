@@ -1,3 +1,4 @@
+import { appName } from "@/config/env";
 import { PERMISSIONS } from "@/constants/permissions";
 import { ROUTES } from "@/constants/routes";
 
@@ -71,5 +72,5 @@ export function titleForPath(pathname) {
   const match = items
     .filter((item) => isNavActive(pathname, item))
     .sort((a, b) => (b.match || b.href).length - (a.match || a.href).length)[0];
-  return match?.label || "App";
+  return match?.label || appName;
 }

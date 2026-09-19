@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { appName } from "@/config/env";
+import { appName, appShortTagline } from "@/config/env";
 import { isNavActive, navGroups, navItems } from "@/config/nav";
 import { useAuth } from "@/contexts/AuthProvider";
 import { Button } from "@/components/ui/Button";
@@ -79,7 +79,14 @@ export function SidebarNav({ onNavigate, collapsed = false }) {
 }
 
 export function Sidebar({ collapsed = false, onToggleCollapsed }) {
-  const mark = appName?.trim()?.[0] || "A";
+  const mark =
+    appName
+      ?.trim()
+      .split(/\s+/)
+      .map((word) => word[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "NE";
 
   return (
     <aside
@@ -91,13 +98,18 @@ export function Sidebar({ collapsed = false, onToggleCollapsed }) {
       <div
         className={cn(
           "flex border-b border-border",
-          collapsed ? "flex-col items-center gap-2 px-2 py-3" : "h-16 items-center gap-2 px-3"
+          collapsed ? "flex-col items-center gap-2 px-2 py-3" : "min-h-16 items-center gap-2 px-3 py-2"
         )}
       >
         <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 font-display text-sm font-semibold text-primary">
           {mark}
         </span>
-        {!collapsed ? <span className="min-w-0 flex-1 truncate font-display text-base font-semibold">{appName}</span> : null}
+        {!collapsed ? (
+          <span className="min-w-0 flex-1 leading-tight">
+            <span className="block truncate font-display text-base font-semibold">{appName}</span>
+            <span className="block truncate text-[11px] font-medium uppercase tracking-[0.14em] text-muted">{appShortTagline}</span>
+          </span>
+        ) : null}
         <Button
           variant="ghost"
           size="icon"

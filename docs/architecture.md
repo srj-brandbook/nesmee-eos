@@ -1,5 +1,7 @@
 # Architecture
 
+Nesmee EOS is an export operating system: sourcing, markets, corridors, documents, and billing behind one permission-aware workspace.
+
 ```
 Browser → Next.js frontend → Express REST API → Service layer → Mongoose → MongoDB
 ```

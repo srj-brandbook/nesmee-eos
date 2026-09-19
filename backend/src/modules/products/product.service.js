@@ -8,6 +8,7 @@ const { parsePagination, paginationMeta, parseSort } = require("../../utils/pagi
 const { serializeProduct, serializeShare, serializeSupplier } = require("../../utils/productSerializer");
 const auditService = require("../audit/audit.service");
 const notificationService = require("../notifications/notification.service");
+const { migrateExportProducts } = require("./product.migrate");
 
 const OWNER_SELECT = "name email avatarUrl";
 const SUPPLIER_SELECT = "name legalName stage email verificationStatus country city ownerId";
@@ -95,22 +96,8 @@ async function hydrate(item, req, extras = {}) {
   return serializeProduct(populated, extras, hideFinance(req));
 }
 
-const { migrateExportProducts } = require("./product.migrate");
-
-let migrated = false;
-
-async function ensureMigrated() {
-  if (migrated) return;
-  migrated = true;
-  try {
-    await migrateExportProducts();
-  } catch {
-    migrated = false;
-  }
-}
-
 async function list(query = {}, req) {
-  await ensureMigrated();
+  await migrateExportProducts();
   const { page, limit, skip } = parsePagination(query);
   const sort = parseSort(query.sort, ["createdAt", "name", "sku", "status", "listingStatus", "updatedAt"]);
   const filter = notDeleted();

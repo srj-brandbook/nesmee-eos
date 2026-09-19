@@ -1,6 +1,6 @@
 # Backend
 
-Express API for the SaaS boilerplate.
+Express API for Nesmee EOS, the export operating system.
 
 ```bash
 copy .env.example .env

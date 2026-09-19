@@ -1,6 +1,6 @@
 # Frontend
 
-Next.js App Router, JavaScript only, Tailwind CSS.
+Next.js App Router UI for Nesmee EOS. JavaScript only, Tailwind CSS.
 
 ## Folders
 

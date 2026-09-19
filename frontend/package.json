@@ -1,7 +1,8 @@
 {
-  "name": "saas-frontend",
+  "name": "nesmee-eos-frontend",
   "version": "1.0.0",
   "private": true,
+  "description": "Nesmee EOS — export operating system UI",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

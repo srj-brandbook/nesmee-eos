@@ -1,4 +1,4 @@
-import { appName } from "@/config/env";
+import { appName, appTagline } from "@/config/env";
 
 export function Footer() {
   return (
@@ -6,7 +6,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 md:grid-cols-4">
         <div>
           <p className="font-display font-semibold">{appName}</p>
-          <p className="mt-2 text-sm text-muted">A reusable production foundation for future SaaS products.</p>
+          <p className="mt-2 text-sm text-muted">The {appTagline.toLowerCase()} for sourcing, markets, documents, and billing.</p>
         </div>
         <div>
           <p className="text-sm font-semibold">Product</p>
@@ -24,7 +24,7 @@ export function Footer() {
         </div>
         <div>
           <p className="text-sm font-semibold">Legal</p>
-          <p className="mt-3 text-sm text-muted">Privacy and terms can be added per product.</p>
+          <p className="mt-3 text-sm text-muted">Privacy and terms can be added as you go live.</p>
         </div>
       </div>
     </footer>

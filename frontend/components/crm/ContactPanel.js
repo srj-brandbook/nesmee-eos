@@ -18,7 +18,13 @@ import { ApiClientError } from "@/lib/api/apiClient";
 
 const emptyContact = { name: "", role: "", email: "", phone: "", notes: "", isPrimary: false };
 
-export function ContactPanel({ leadId, contacts = [], onChanged }) {
+export function ContactPanel({
+  leadId,
+  contacts = [],
+  onChanged,
+  title = "Contacts",
+  description = "People at this manufacturer who can move an order forward.",
+}) {
   const { can } = useAuth();
   const toast = useToast();
   const [form, setForm] = useState(emptyContact);
@@ -83,8 +89,8 @@ export function ContactPanel({ leadId, contacts = [], onChanged }) {
     <Card>
       <CardHeader className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-semibold">Contacts</h2>
-          <p className="mt-1 text-sm text-muted">People at this manufacturer who can move an order forward.</p>
+          <h2 className="font-semibold">{title}</h2>
+          <p className="mt-1 text-sm text-muted">{description}</p>
         </div>
         {canEdit && !formOpen ? (
           <Button size="sm" onClick={startCreate}>

@@ -4,11 +4,13 @@ const env = require("../config/env");
 const { hashPassword } = require("../utils/hash");
 
 async function seedSuperAdmin(superAdminRole) {
-  await Settings.findOneAndUpdate(
-    { key: "app" },
-    { $setOnInsert: { key: "app", name: "SaaS Boilerplate", supportEmail: env.SUPERADMIN_EMAIL } },
-    { upsert: true }
-  );
+  const settings = await Settings.findOne({ key: "app" });
+  if (!settings) {
+    await Settings.create({ key: "app", name: "Nesmee EOS", supportEmail: env.SUPERADMIN_EMAIL });
+  } else if (!settings.name || /saas\s*boilerplate/i.test(settings.name)) {
+    settings.name = "Nesmee EOS";
+    await settings.save();
+  }
 
   const existing = await User.findOne({ email: env.SUPERADMIN_EMAIL.toLowerCase(), deletedAt: null });
   if (existing) {

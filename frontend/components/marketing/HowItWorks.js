@@ -1,7 +1,7 @@
 const steps = [
-  ["Seed", "Create permissions, roles, and the Super Admin."],
-  ["Sign in", "HTTP-only session cookie. No tokens in localStorage."],
-  ["Extend", "Add a module from model to navigation without touching auth."],
+  ["Source", "Qualify suppliers, products, and compliance in one workspace."],
+  ["Route", "Choose markets and corridors, then price landed cost before you quote."],
+  ["Operate", "Issue documents, invoices, and alerts as shipments move."],
 ];
 
 export function HowItWorks() {

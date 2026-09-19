@@ -20,9 +20,11 @@ function wrapHtml(title, body) {
   return `<!doctype html>
 <html>
   <body style="font-family: Inter, Arial, sans-serif; color: #111827; line-height: 1.5;">
+    <p style="font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#4f46e5;margin:0 0 12px;">Nesmee EOS</p>
     <h1 style="font-size: 20px;">${title}</h1>
     ${body}
     <p style="color:#6b7280;font-size:12px;">If you did not request this, you can ignore this email.</p>
+    <p style="color:#9ca3af;font-size:11px;">Nesmee EOS · Export operating system</p>
   </body>
 </html>`;
 }
@@ -48,8 +50,8 @@ async function sendVerificationEmail({ to, name, token }) {
   const url = `${env.APP_URL}/verify-email?token=${encodeURIComponent(token)}`;
   return sendMail({
     to,
-    subject: "Verify your email",
-    text: `Hi ${name},\n\nVerify your email: ${url}\n`,
+    subject: "Verify your email for Nesmee EOS",
+    text: `Hi ${name},\n\nVerify your email to start using Nesmee EOS: ${url}\n`,
     html: wrapHtml("Verify your email", `<p>Hi ${name},</p><p><a href="${url}">Verify email address</a></p>`),
   });
 }
@@ -58,8 +60,8 @@ async function sendPasswordResetEmail({ to, name, token }) {
   const url = `${env.APP_URL}/reset-password?token=${encodeURIComponent(token)}`;
   return sendMail({
     to,
-    subject: "Reset your password",
-    text: `Hi ${name},\n\nReset your password: ${url}\nThis link expires soon.\n`,
+    subject: "Reset your Nesmee EOS password",
+    text: `Hi ${name},\n\nReset your Nesmee EOS password: ${url}\nThis link expires soon.\n`,
     html: wrapHtml("Reset your password", `<p>Hi ${name},</p><p><a href="${url}">Reset password</a></p>`),
   });
 }

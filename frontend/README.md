@@ -1,6 +1,6 @@
 # Frontend
 
-Next.js App Router UI for the SaaS boilerplate.
+Next.js App Router UI for Nesmee EOS, the export operating system.
 
 ```bash
 copy .env.example .env.local

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
-import { appName } from "@/config/env";
+import { appName, appShortTagline } from "@/config/env";
 import { Drawer } from "@/components/ui/Drawer";
 import { Button } from "@/components/ui/Button";
 import { AccountMenu } from "./AccountMenu";
@@ -50,7 +50,10 @@ export function AppShell({ children }) {
       </div>
       <Drawer open={mobileOpen} onClose={closeMobile}>
         <div className="mb-4 flex items-center justify-between gap-2">
-          <div className="font-display text-lg font-semibold">{appName}</div>
+          <div className="leading-tight">
+            <div className="font-display text-lg font-semibold">{appName}</div>
+            <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">{appShortTagline}</div>
+          </div>
           <Button variant="ghost" size="icon" onClick={closeMobile} aria-label="Close menu">
             <X className="h-4 w-4" />
           </Button>

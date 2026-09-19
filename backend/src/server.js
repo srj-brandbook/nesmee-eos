@@ -6,9 +6,15 @@ const { startActivityReminders } = require("./jobs/activityReminders");
 const { startExportAlerts } = require("./jobs/exportAlerts");
 const { startVerificationExpiry } = require("./jobs/verificationExpiry");
 const { startInvoiceOverdue } = require("./jobs/invoiceOverdue");
+const { migrateExportProducts } = require("./modules/products/product.migrate");
 
 async function start() {
   await connectDb(env.MONGO_URI);
+  try {
+    await migrateExportProducts();
+  } catch (error) {
+    logger.error({ err: error }, "Failed to migrate export products into catalog");
+  }
   const app = createApp();
   if (env.NODE_ENV !== "test") {
     const cron = require("node-cron");

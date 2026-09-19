@@ -20,11 +20,6 @@ export const CORRIDOR_STATUSES = [
   { value: "unavailable", label: "Unavailable" },
 ];
 
-export const PRODUCT_STATUSES = [
-  { value: "active", label: "Active" },
-  { value: "inactive", label: "Inactive" },
-];
-
 export const MAPPING_STATUSES = [
   { value: "active", label: "Active" },
   { value: "inactive", label: "Inactive" },

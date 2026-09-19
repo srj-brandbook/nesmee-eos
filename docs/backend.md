@@ -1,6 +1,6 @@
 # Backend
 
-Layered Express API.
+Layered Express API for Nesmee EOS.
 
 ```
 Route → Middleware → Controller → Service → Model → MongoDB

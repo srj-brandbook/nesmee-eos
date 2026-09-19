@@ -1,5 +1,5 @@
 import { Inter, Sora } from "next/font/google";
-import { appName } from "@/config/env";
+import { appName, appTagline } from "@/config/env";
 import { AuthProvider } from "@/contexts/AuthProvider";
 import { ToastProvider } from "@/contexts/ToastProvider";
 import "./globals.css";
@@ -9,7 +9,7 @@ const sora = Sora({ subsets: ["latin"], variable: "--font-display" });
 
 export const metadata = {
   title: appName,
-  description: "Production-ready SaaS boilerplate",
+  description: `${appName} — ${appTagline.toLowerCase()} for sourcing, markets, documents, and billing.`,
 };
 
 export default function RootLayout({ children }) {

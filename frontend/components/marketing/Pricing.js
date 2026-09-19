@@ -3,16 +3,16 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardBody } from "@/components/ui/Card";
 
 const plans = [
-  ["Starter", "$0", "Internal tools and prototypes", ["Unlimited users in self-host", "Email auth", "RBAC"]],
-  ["Growth", "$49", "Marketing placeholder", ["Everything in Starter", "Priority support placeholder", "Audit exports later"]],
-  ["Scale", "Talk to us", "When billing becomes a module", ["SSO later", "Orgs later", "Custom deployment"]],
+  ["Starter", "$0", "For teams running their own instance", ["Sourcing workspace", "Markets and corridors", "Documents and billing"]],
+  ["Growth", "$49", "For exporters adding lanes every quarter", ["Everything in Starter", "Landed cost calculator", "Alerts and analytics"]],
+  ["Scale", "Talk to us", "For multi-market operations", ["Custom onboarding", "Role design with your team", "Dedicated support"]],
 ];
 
 export function Pricing() {
   return (
     <section id="pricing" className="mx-auto max-w-6xl px-4 py-16">
       <h2 className="font-display text-3xl font-semibold">Pricing</h2>
-      <p className="mt-2 text-sm text-muted">Marketing-only. Billing is a future module, not wired to Stripe.</p>
+      <p className="mt-2 text-sm text-muted">Choose a plan that matches how many markets you operate.</p>
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         {plans.map(([name, price, blurb, features]) => (
           <Card key={name}>

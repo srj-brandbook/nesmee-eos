@@ -1,11 +1,11 @@
-# SaaS Boilerplate
+# Nesmee EOS
 
-Reusable production foundation for future SaaS products.
+Export operating system for sourcing, markets, corridors, documents, and billing.
 
 - `frontend/` — Next.js App Router (JavaScript, Tailwind)
 - `backend/` — Express REST API at `/api/v1` (JavaScript, MongoDB, Mongoose)
 
-The apps are independently deployable and can later become separate repositories. MongoDB is accessed only by Express.
+The apps are independently deployable. MongoDB is accessed only by Express.
 
 ## Quick start
 

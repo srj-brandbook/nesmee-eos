@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { appName } from "@/config/env";
+import { appName, appTagline } from "@/config/env";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -7,8 +7,9 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-20 border-b border-border/80 bg-bg/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link href="/" className="font-display text-lg font-semibold">
-          {appName}
+        <Link href="/" className="leading-tight">
+          <span className="block font-display text-lg font-semibold">{appName}</span>
+          <span className="hidden text-[11px] font-medium uppercase tracking-[0.16em] text-muted sm:block">{appTagline}</span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm text-muted md:flex">
           <a href="#features">Features</a>

@@ -1,6 +1,6 @@
 const quotes = [
-  ["We stopped rebuilding login and roles for every idea.", "Maya Chen", "Founding engineer"],
-  ["The permission matrix made admin work obvious to non-engineers.", "Luis Ortega", "Operations"],
+  ["We finally see margin by corridor before we quote.", "Priya Shah", "Export manager"],
+  ["Suppliers, documents, and invoices live in one place instead of five inboxes.", "Daniel Okonkwo", "Operations"],
 ];
 
 export function Testimonials() {

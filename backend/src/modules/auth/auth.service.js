@@ -154,7 +154,7 @@ async function signup({ name, email, password }, req) {
     userId: user._id,
     type: "welcome",
     title: "Welcome",
-    body: "Verify your email to start using the dashboard.",
+    body: "Verify your email to start using Nesmee EOS.",
   });
 
   return { user: serializeUser(user) };

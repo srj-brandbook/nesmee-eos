@@ -1,10 +1,10 @@
 import { Accordion } from "@/components/ui/Accordion";
 
 const items = [
-  { q: "Is this TypeScript?", a: "No. Frontend and backend are JavaScript only." },
-  { q: "Where is security enforced?", a: "On the Express API. UI permission checks only hide navigation and actions." },
-  { q: "Can I add CRM or billing later?", a: "Yes. Follow docs/adding-module.md. Do not fork auth or the API client." },
-  { q: "How do emails work locally?", a: "Use Mailhog via Docker Compose. Verification and reset links appear at localhost:8025." },
+  { q: "What is Nesmee EOS?", a: "An export operating system. It connects sourcing, markets, corridors, documents, and billing in one workspace." },
+  { q: "Who is it for?", a: "Exporters, trading houses, and sourcing teams who need one system from supplier to destination market." },
+  { q: "Does it handle landed cost?", a: "Yes. FX, duties, freight, and Incoterms are built into the calculator so you can quote with margin in view." },
+  { q: "How do I get started?", a: "Create an account, verify your email, and open the workspace. Markets, corridors, and documents are ready from day one." },
 ];
 
 export function FAQ() {

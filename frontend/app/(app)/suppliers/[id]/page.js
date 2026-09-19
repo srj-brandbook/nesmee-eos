@@ -2,14 +2,14 @@
 
 import { useParams } from "next/navigation";
 import { PermissionGate } from "@/components/layout/PermissionGate";
-import { LeadDetail } from "@/components/crm/LeadDetail";
+import { SupplierDetail } from "@/components/crm/SupplierDetail";
 import { PERMISSIONS } from "@/constants/permissions";
 
 export default function SupplierDetailPage() {
   const { id } = useParams();
   return (
     <PermissionGate permission={PERMISSIONS.LEADS_VIEW}>
-      <LeadDetail leadId={id} variant="directory" />
+      <SupplierDetail supplierId={id} />
     </PermissionGate>
   );
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { appName } from "@/config/env";
+import { appName, appTagline } from "@/config/env";
 
 export default function AuthLayout({ children }) {
   return (
@@ -9,10 +9,10 @@ export default function AuthLayout({ children }) {
           {appName}
         </Link>
         <div>
-          <p className="font-display text-3xl font-semibold">A calm place to start the next product.</p>
-          <p className="mt-3 max-w-sm text-slate-300">Sessions stay in HTTP-only cookies. Permissions live in the database.</p>
+          <p className="font-display text-3xl font-semibold">The {appTagline.toLowerCase()} for your trade lanes.</p>
+          <p className="mt-3 max-w-sm text-slate-300">Markets, corridors, documents, and billing in one permission-aware workspace.</p>
         </div>
-        <p className="text-sm text-slate-400">JavaScript · Next.js · Express · MongoDB</p>
+        <p className="text-sm text-slate-400">{appName}</p>
       </div>
       <div className="flex items-center justify-center p-6">{children}</div>
     </div>

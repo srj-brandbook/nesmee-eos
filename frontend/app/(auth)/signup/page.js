@@ -39,7 +39,7 @@ export default function SignupPage() {
     <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4">
       <div>
         <h1 className="font-display text-2xl font-semibold">Create your account</h1>
-        <p className="mt-1 text-sm text-muted">We’ll send a verification link.</p>
+        <p className="mt-1 text-sm text-muted">We’ll send a verification link to open your workspace.</p>
       </div>
       {error ? <Alert variant="danger">{error}</Alert> : null}
       {success ? <Alert variant="success">{success}</Alert> : null}

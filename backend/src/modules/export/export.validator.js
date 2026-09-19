@@ -2,7 +2,6 @@ const Joi = require("joi");
 const {
   MARKET_STATUSES,
   CORRIDOR_STATUSES,
-  PRODUCT_STATUSES,
   MAPPING_STATUSES,
   LOOKUP_TYPES,
   LOOKUP_STATUSES,
@@ -80,21 +79,6 @@ const fxBody = {
   source: Joi.string().allow(""),
   bufferPct: Joi.number(),
   riskAdjustmentPct: Joi.number(),
-};
-
-const productBody = {
-  name: Joi.string().trim().min(2).max(160),
-  sku: Joi.string().trim().allow(""),
-  hsCode: Joi.string().trim().allow(""),
-  categoryLookupId: objectId.allow(null, ""),
-  category: Joi.string().trim().allow(""),
-  unit: Joi.string().trim().allow(""),
-  status: Joi.string().valid(...PRODUCT_STATUSES),
-  baseCost: Joi.number().min(0),
-  baseCurrency: Joi.string().trim().allow(""),
-  notes: Joi.string().allow(""),
-  ownerId: objectId.allow(null, ""),
-  customFields: Joi.object().unknown(true),
 };
 
 const marketBody = {
@@ -373,9 +357,6 @@ module.exports = {
       requirementExpiryDays: Joi.number(),
     }).required(),
   }),
-  listProducts: listQuery({ status: Joi.string().valid(...PRODUCT_STATUSES) }),
-  createProduct: create(productBody, ["name"]),
-  updateProduct: update(productBody),
   listMarkets: listQuery({
     status: Joi.string().valid(...MARKET_STATUSES),
     region: Joi.string(),

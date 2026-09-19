@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
+import { appName } from "@/config/env";
 import { navItems, settingsNav, titleForPath } from "@/config/nav";
 
 function crumbLabel(href, part) {
@@ -28,7 +29,7 @@ export function Breadcrumbs() {
       <ol className="flex min-w-0 max-w-full items-center gap-1 overflow-x-auto whitespace-nowrap text-[11px] leading-none text-muted [scrollbar-width:none] md:text-xs [&::-webkit-scrollbar]:hidden">
         <li className="shrink-0">
           <Link href="/dashboard" className="transition hover:text-text">
-            App
+            {appName}
           </Link>
         </li>
         {parts.map((part, index) => {

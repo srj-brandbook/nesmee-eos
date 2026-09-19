@@ -1,9 +1,11 @@
+const mongoose = require("mongoose");
 const { setupDb, teardownDb, login, createMember, createUserWithRole } = require("./helpers");
 const env = require("../src/config/env");
 const Lead = require("../src/models/Lead");
 const Product = require("../src/models/Product");
 const ExportBuyer = require("../src/models/ExportBuyer");
 const Role = require("../src/models/Role");
+const { migrateExportProducts } = require("../src/modules/products/product.migrate");
 const {
   PRODUCTS_PERMISSION_NAMES,
   SALES_PRODUCTS_PERMISSIONS,
@@ -481,5 +483,45 @@ describe("product catalog role access", () => {
     const unlisted = await csrf(agent.post(`/api/v1/products/${listedProduct._id}/unlist`)).send({});
     expectAllowed(unlisted);
     expect(unlisted.body.data.product.listingStatus).toBe("unlisted");
+  });
+});
+
+describe("export product migration", () => {
+  it("copies leftover ExportProduct records into the catalog and removes the old collection", async () => {
+    const { agent } = await login(env.SUPERADMIN_EMAIL, env.SUPERADMIN_PASSWORD);
+    const sourceId = new mongoose.Types.ObjectId();
+    await mongoose.connection.db.collection("exportproducts").insertOne({
+      _id: sourceId,
+      name: "Legacy Cardamom",
+      sku: `LEG-${Date.now()}`,
+      hsCode: "0908",
+      category: "Spices",
+      unit: "kg",
+      status: "active",
+      baseCost: 12,
+      baseCurrency: "USD",
+      notes: "migrated sku",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const result = await migrateExportProducts();
+    expect(result.copied).toBe(1);
+
+    const catalog = await Product.findById(sourceId).lean();
+    expect(catalog.name).toBe("Legacy Cardamom");
+    expect(catalog.origin).toBe("migrated");
+    expect(catalog.listingStatus).toBe("listed");
+    expect(catalog.verificationStatus).toBe("none");
+
+    const leftover = await mongoose.connection.db.listCollections({ name: "exportproducts" }).toArray();
+    expect(leftover).toHaveLength(0);
+
+    const listed = await csrf(agent.get("/api/v1/products?search=Legacy%20Cardamom"));
+    expect(listed.status).toBe(200);
+    expect(listed.body.data.items.some((item) => item.id === String(sourceId))).toBe(true);
+
+    const gone = await csrf(agent.get("/api/v1/export/products"));
+    expect(gone.status).toBe(404);
   });
 });

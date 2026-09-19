@@ -31,6 +31,7 @@ const verificationRoutes = require("./modules/verification/verification.routes")
 const billingRoutes = require("./modules/billing/billing.routes");
 const documentRoutes = require("./modules/documents/document.routes");
 const productRoutes = require("./modules/products/product.routes");
+const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 
 function createApp() {
   const app = express();
@@ -84,6 +85,7 @@ function createApp() {
   app.use("/api/v1/billing", billingRoutes);
   app.use("/api/v1/documents", documentRoutes);
   app.use("/api/v1/products", productRoutes);
+  app.use("/api/v1/dashboard", dashboardRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

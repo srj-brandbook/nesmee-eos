@@ -20,7 +20,6 @@ const CORRIDOR_STATUSES = [
   "unavailable",
 ];
 
-const PRODUCT_STATUSES = ["active", "inactive"];
 const MAPPING_STATUSES = ["active", "inactive", "restricted", "pending_review"];
 const LOOKUP_TYPES = [
   "region",
@@ -275,7 +274,6 @@ const DEFAULT_INCOTERMS = [
 module.exports = {
   MARKET_STATUSES,
   CORRIDOR_STATUSES,
-  PRODUCT_STATUSES,
   MAPPING_STATUSES,
   LOOKUP_TYPES,
   LOOKUP_STATUSES,

@@ -116,31 +116,6 @@ function serializeSettings(item) {
   };
 }
 
-function serializeProduct(item, hideFinance = false) {
-  const source = item.toObject ? item.toObject() : item;
-  return stripFinance(
-    {
-      id: String(source._id),
-      name: source.name,
-      sku: source.sku || "",
-      hsCode: source.hsCode || "",
-      categoryLookupId: idOf(source.categoryLookupId),
-      category: source.category || "",
-      unit: source.unit || "unit",
-      status: source.status,
-      baseCost: source.baseCost || 0,
-      baseCurrency: source.baseCurrency || "INR",
-      notes: source.notes || "",
-      customFields: source.customFields || {},
-      ownerId: idOf(source.ownerId),
-      owner: serializePerson(source.ownerId),
-      createdAt: source.createdAt,
-      updatedAt: source.updatedAt,
-    },
-    hideFinance
-  );
-}
-
 function serializeMarket(item, extras = {}, hideFinance = false) {
   const source = item.toObject ? item.toObject() : item;
   return stripFinance(
@@ -491,7 +466,6 @@ module.exports = {
   serializeScoreProfile,
   serializeFxRate,
   serializeSettings,
-  serializeProduct,
   serializeMarket,
   serializeMapping,
   serializeCorridor,

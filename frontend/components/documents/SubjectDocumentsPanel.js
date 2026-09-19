@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardBody } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { GenerateDocumentModal } from "./GenerateDocumentModal";
 import { DocumentModal } from "./DocumentModal";
 import { DocumentWorkspace } from "./DocumentWorkspace";
@@ -22,6 +23,7 @@ export function SubjectDocumentsPanel({ subjectType = "lead", subjectId }) {
   const { can } = useAuth();
   const toast = useToast();
   const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [openGenerate, setOpenGenerate] = useState(false);
   const [openId, setOpenId] = useState(null);
 
@@ -32,7 +34,10 @@ export function SubjectDocumentsPanel({ subjectType = "lead", subjectId }) {
 
   useEffect(() => {
     if (!subjectId) return;
-    load().catch(() => toast.error("Unable to load documents"));
+    setLoading(true);
+    load()
+      .catch(() => toast.error("Unable to load documents"))
+      .finally(() => setLoading(false));
   }, [subjectId, subjectType]);
 
   return (
@@ -46,7 +51,12 @@ export function SubjectDocumentsPanel({ subjectType = "lead", subjectId }) {
           </Button>
         ) : null}
       </div>
-      {!items.length ? (
+      {loading ? (
+        <div className="space-y-2">
+          <Skeleton className="h-16 w-full" />
+          <Skeleton className="h-16 w-full" />
+        </div>
+      ) : !items.length ? (
         <EmptyState
           title="No documents yet"
           description="Generate a proposal, NOC, or letter from a published template."
