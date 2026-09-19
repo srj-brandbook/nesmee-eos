@@ -29,7 +29,10 @@ export const exportService = {
   incoterms: resource("/export/incoterms"),
   scoreProfiles: resource("/export/score-profiles"),
   fxRates: resource("/export/fx-rates"),
-  products: resource("/export/products"),
+  products: {
+    list: (params = {}) => apiClient(`/products${qs({ listingStatus: "listed", ...params })}`),
+    get: (id) => apiClient(`/products/${id}`),
+  },
   markets: {
     ...resource("/export/markets"),
     evaluate: (id, body) => apiClient(`/export/markets/${id}/evaluate`, { method: "POST", body }),

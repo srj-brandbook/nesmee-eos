@@ -12,7 +12,7 @@ const exportBuyerSchema = new mongoose.Schema(
     country: { type: String, default: "", trim: true },
     city: { type: String, default: "", trim: true },
     productInterest: { type: String, default: "", trim: true },
-    productIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "ExportProduct" }],
+    productIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     annualPotential: { type: Number, default: 0 },
     priceExpectation: { type: Number, default: 0 },
     paymentTerms: { type: String, default: "", trim: true },

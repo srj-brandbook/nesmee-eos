@@ -148,7 +148,8 @@ export function VerificationReviewDesk({ item, onChanged }) {
   const isSuperAdmin = Boolean(user?.roles?.some((role) => role.isSuperAdmin));
   const ownSubmission = Boolean(item.submittedBy && String(item.submittedBy) === String(user?.id) && !isSuperAdmin);
   const canApprove = progress.remaining === 0 && progress.returned === 0;
-  const supplierHref = item.lead?.stage === "won" ? `${ROUTES.suppliers}/${item.leadId}` : `${ROUTES.leads}/${item.leadId}`;
+  const subjectHref = item.productId ? `${ROUTES.products}/${item.productId}` : item.lead?.stage === "won" ? `${ROUTES.suppliers}/${item.leadId}` : `${ROUTES.leads}/${item.leadId}`;
+  const subjectName = item.product?.name || item.lead?.name || "Subject";
 
   const timeline = useMemo(() => {
     const events = [];
@@ -392,8 +393,8 @@ export function VerificationReviewDesk({ item, onChanged }) {
               Review queue
             </Link>
             {" · "}
-            <Link href={supplierHref} className="hover:text-text">
-              {item.lead?.name || "Supplier"}
+            <Link href={subjectHref} className="hover:text-text">
+              {subjectName}
             </Link>
           </p>
           <h1 className="font-display text-xl font-semibold sm:text-2xl">{item.title}</h1>

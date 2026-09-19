@@ -11,9 +11,10 @@ function qs(params = {}) {
 
 export const verificationService = {
   list: (params) => apiClient(`/verification${qs(params)}`),
-  templates: () => apiClient("/verification/templates"),
+  templates: (params) => apiClient(`/verification/templates${qs(params)}`),
   assignees: () => apiClient("/verification/assignees"),
   summary: (leadId) => apiClient(`/verification/leads/${leadId}/summary`),
+  productSummary: (productId) => apiClient(`/verification/products/${productId}/summary`),
   get: (id) => apiClient(`/verification/${id}`),
   create: (body) => apiClient("/verification", { method: "POST", body }),
   saveDraft: (id, body) => apiClient(`/verification/${id}`, { method: "PATCH", body }),

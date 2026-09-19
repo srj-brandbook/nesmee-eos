@@ -1,0 +1,24 @@
+.bn-container {
+  --bn-colors-editor-background: rgb(var(--color-surface));
+  --bn-colors-editor-text: rgb(var(--color-text));
+  --bn-colors-hovered-background: rgb(var(--color-bg));
+  --bn-colors-menu-background: rgb(var(--color-surface));
+  --bn-colors-border: rgb(var(--color-border));
+  --bn-colors-highlights-blue-background: rgb(224 242 254);
+  font-family: var(--font-sans);
+}
+
+.bn-editor {
+  min-height: 28rem;
+  padding-inline: 3.5rem;
+  padding-bottom: 6rem;
+}
+
+.bn-block-content h1,
+.bn-block-content[data-content-type="heading"] {
+  font-family: var(--font-display);
+}
+
+.doc-editor-canvas .bn-container {
+  background: transparent;
+}

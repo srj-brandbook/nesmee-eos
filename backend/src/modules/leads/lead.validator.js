@@ -10,6 +10,7 @@ const listSchema = Joi.object({
     source: Joi.string().valid(...LEAD_SOURCES),
     country: Joi.string().allow(""),
     ownerId: objectId,
+    verificationStatus: Joi.string().valid("none", "pending", "verified", "rejected", "expired"),
     sort: Joi.string(),
     page: Joi.number().integer().min(1),
     limit: Joi.number().integer().min(1).max(100),

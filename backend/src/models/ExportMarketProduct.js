@@ -4,7 +4,7 @@ const { MAPPING_STATUSES } = require("../constants/export");
 const exportMarketProductSchema = new mongoose.Schema(
   {
     marketId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportMarket", required: true },
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportProduct", required: true },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
     hsCode: { type: String, default: "", trim: true },
     eligibilityStatus: { type: String, enum: MAPPING_STATUSES, default: "pending_review" },
     minOrderQty: { type: Number, default: 0 },

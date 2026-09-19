@@ -5,7 +5,7 @@ const exportRequirementSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
     marketId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportMarket", required: true },
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportProduct", default: null },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: null },
     productCategory: { type: String, default: "", trim: true },
     requirementType: { type: String, default: "other", trim: true },
     mandatory: { type: Boolean, default: true },

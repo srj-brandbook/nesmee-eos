@@ -10,6 +10,7 @@ const {
   emptyDefinition,
   createSupplierOnboardingTemplate,
   createFrozenFoodPermitTemplate,
+  createProductComplianceTemplate,
   toFieldKey,
   uniqueKey,
   nextVersionLabel,
@@ -124,7 +125,9 @@ async function create(payload, actor, req) {
       ? createSupplierOnboardingTemplate()
       : payload.template === "frozen_food_permit"
         ? createFrozenFoodPermitTemplate()
-        : emptyDefinition({ name: payload.name });
+        : payload.template === "product_compliance"
+          ? createProductComplianceTemplate()
+          : emptyDefinition({ name: payload.name });
   const name = payload.name || template.name;
   const description = payload.description ?? template.description;
   const purpose =
@@ -133,7 +136,9 @@ async function create(payload, actor, req) {
       ? "supplier_onboarding"
       : payload.template === "frozen_food_permit"
         ? "supplier_verification"
-        : "general");
+        : payload.template === "product_compliance"
+          ? "product_verification"
+          : "general");
   const form = await FormDefinition.create({
     name,
     description,

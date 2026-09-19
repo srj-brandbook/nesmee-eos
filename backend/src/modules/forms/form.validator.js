@@ -24,7 +24,7 @@ const createSchema = Joi.object({
   body: Joi.object({
     name: Joi.string().trim().min(2).max(160).required(),
     description: Joi.string().trim().allow("").max(2000),
-    template: Joi.string().valid("blank", "supplier_onboarding", "frozen_food_permit"),
+    template: Joi.string().valid("blank", "supplier_onboarding", "frozen_food_permit", "product_compliance"),
     purpose: Joi.string().valid(...FORM_PURPOSES),
   }).required(),
 });

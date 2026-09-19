@@ -2,10 +2,12 @@ const { v2: cloudinary } = require("cloudinary");
 const env = require("../../config/env");
 const ApiError = require("../../utils/ApiError");
 
-const PURPOSES = ["avatars", "forms"];
+const PURPOSES = ["avatars", "forms", "documents", "products"];
 const MAX_BYTES = {
   avatars: 2 * 1024 * 1024,
   forms: 15 * 1024 * 1024,
+  documents: 25 * 1024 * 1024,
+  products: 80 * 1024 * 1024,
 };
 
 function configured() {
@@ -32,7 +34,7 @@ function purposeOf(folder) {
 
 function resolveFolder(requested) {
   const purpose = purposeOf(requested);
-  if (!purpose) throw ApiError.badRequest("Invalid upload folder", { folder: "Must be avatars or forms" });
+  if (!purpose) throw ApiError.badRequest("Invalid upload folder", { folder: "Must be avatars, forms, documents, or products" });
   const base = String(env.CLOUDINARY_FOLDER || "nesmee").replace(/\/+$/, "");
   return { purpose, folder: `${base}/${purpose}` };
 }
@@ -79,4 +81,107 @@ async function discardPrevious(previousPublicId, nextPublicId, resourceType = "i
   }
 }
 
-module.exports = { sign, destroy, discardPrevious, configured, resolveFolder, MAX_BYTES };
+function uploadBuffer({ buffer, folder = "documents", filename = "document.pdf", resourceType = "image" } = {}) {
+  configure();
+  const resolved = resolveFolder(folder);
+  const publicId = String(filename || "document")
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^a-zA-Z0-9/_-]+/g, "-")
+    .slice(0, 80);
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: resolved.folder,
+        resource_type: resourceType,
+        type: "upload",
+        access_mode: "public",
+        public_id: `${publicId}-${Date.now()}`,
+        format: "pdf",
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve({
+          url: result.secure_url,
+          publicId: result.public_id,
+          name: filename,
+          size: result.bytes || buffer.length,
+          mimeType: "application/pdf",
+          type: "application/pdf",
+          resourceType: result.resource_type || resourceType,
+          format: result.format || "pdf",
+          pages: Number(result.pages) || 0,
+        });
+      }
+    );
+    stream.end(buffer);
+  });
+}
+
+function candidateDownloadUrls(file) {
+  const urls = [];
+  if (file?.url) urls.push(file.url);
+  if (!configured() || !file?.publicId) return [...new Set(urls.filter(Boolean))];
+  configure();
+  const original = String(file.publicId);
+  const stripped = original.replace(/\.(pdf|jpe?g|png|webp)$/i, "");
+  const ids = [...new Set([original, stripped])];
+  const preferred = file.resourceType === "raw" ? ["raw", "image"] : ["image", "raw"];
+  for (const publicId of ids) {
+    for (const resourceType of preferred) {
+      try {
+        urls.push(
+          cloudinary.utils.private_download_url(publicId, "pdf", {
+            resource_type: resourceType,
+            type: "upload",
+            attachment: true,
+            expires_at: Math.floor(Date.now() / 1000) + 120,
+          })
+        );
+      } catch {
+        // SDK may reject an unavailable type.
+      }
+      urls.push(
+        cloudinary.url(publicId, {
+          resource_type: resourceType,
+          type: "upload",
+          secure: true,
+          sign_url: true,
+          format: "pdf",
+        })
+      );
+      urls.push(
+        cloudinary.url(publicId, {
+          resource_type: resourceType,
+          type: "upload",
+          secure: true,
+          sign_url: true,
+        })
+      );
+    }
+  }
+  return [...new Set(urls.filter(Boolean))];
+}
+
+async function downloadBuffer(file) {
+  const urls = candidateDownloadUrls(file);
+  let lastError = null;
+  for (const url of urls) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        lastError = new Error(`HTTP ${response.status}`);
+        continue;
+      }
+      const bytes = Buffer.from(await response.arrayBuffer());
+      if (bytes.length) return bytes;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || ApiError.badRequest("Could not download file");
+}
+
+module.exports = { sign, destroy, discardPrevious, configured, resolveFolder, uploadBuffer, downloadBuffer, MAX_BYTES };

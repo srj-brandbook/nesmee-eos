@@ -31,6 +31,7 @@ export function VerificationInbox() {
   const { page, setPage, limit } = usePagination({ page: 1, limit: 20 });
   const [view, setView] = useState(canReview ? "review" : "mine");
   const [status, setStatus] = useState("");
+  const [subjectType, setSubjectType] = useState("");
   const [data, setData] = useState({ items: [], pagination: { page: 1, totalPages: 1 } });
 
   useEffect(() => {
@@ -39,19 +40,20 @@ export function VerificationInbox() {
     if (view === "review") params.status = "submitted";
     if (view === "expiring") params.expiring = "true";
     if (view === "all" && status) params.status = status;
+    if (subjectType) params.subjectType = subjectType;
     verificationService
       .list(params)
       .then((response) => setData(response.data))
       .catch(() => toast.error("Unable to load verification"));
-  }, [view, status, page, limit]);
+  }, [view, status, subjectType, page, limit]);
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="font-display text-2xl font-semibold">Supplier verification</h1>
-        <p className="text-sm text-muted">Submit assigned cases on the submission screen. Verify submitted evidence on a separate review screen.</p>
+        <h1 className="font-display text-2xl font-semibold">Verification</h1>
+        <p className="text-sm text-muted">Supplier and product cases. Submit on the assignment screen. Review submitted evidence separately.</p>
       </div>
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-3">
         <Select
           label="Queue"
           value={view}
@@ -65,6 +67,18 @@ export function VerificationInbox() {
               {item.label}
             </option>
           ))}
+        </Select>
+        <Select
+          label="Subject"
+          value={subjectType}
+          onChange={(event) => {
+            setSubjectType(event.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">Suppliers and products</option>
+          <option value="lead">Suppliers</option>
+          <option value="product">Products</option>
         </Select>
         {view === "all" ? (
           <Select
@@ -96,7 +110,7 @@ export function VerificationInbox() {
                   <Link href={row.status === "submitted" && canReview ? verificationReviewPath(row.id) : verificationCasePath(row.id)} className="font-medium text-primary hover:underline">
                     {row.title}
                   </Link>
-                  <p className="text-xs text-muted">{row.lead?.name || "Supplier"}</p>
+                  <p className="text-xs text-muted">{row.product?.name || row.lead?.name || "Subject"}</p>
                 </div>
               ),
             },

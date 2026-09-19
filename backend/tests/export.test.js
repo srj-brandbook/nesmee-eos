@@ -1,6 +1,8 @@
 const { setupDb, teardownDb, login, createMember } = require("./helpers");
 const env = require("../src/config/env");
 const { seedExport } = require("../src/seeds/export");
+const Lead = require("../src/models/Lead");
+const Product = require("../src/models/Product");
 
 beforeAll(async () => {
   await setupDb();
@@ -23,16 +25,28 @@ describe("export markets and corridors", () => {
   it("creates a product, market, mapping, corridor and calculates landed cost", async () => {
     const { agent } = await login(env.SUPERADMIN_EMAIL, env.SUPERADMIN_PASSWORD);
 
-    const product = await csrf(agent.post("/api/v1/export/products")).send({
+    const supplier = await Lead.create({
+      name: "Pepper Co",
+      stage: "won",
+      verificationStatus: "verified",
+      wonAt: new Date(),
+    });
+
+    const product = await csrf(agent.post("/api/v1/products")).send({
       name: "Malabar Black Pepper",
       sku: "PEP-001",
       hsCode: "0904",
       category: "Food",
-      baseCost: 8,
-      baseCurrency: "USD",
+      supplierId: String(supplier._id),
+      indicativePrice: 8,
+      currency: "USD",
     });
     expect(product.status).toBe(201);
     const productId = product.body.data.product.id;
+    await Product.updateOne(
+      { _id: productId },
+      { $set: { listingStatus: "listed", verificationStatus: "verified", status: "verified" } }
+    );
 
     const market = await csrf(agent.post("/api/v1/export/markets")).send({
       name: "United Arab Emirates",

@@ -3,6 +3,8 @@ const { FORMS_PERMISSIONS } = require("./forms");
 const { EXPORT_PERMISSIONS } = require("./export");
 const { VERIFICATION_PERMISSIONS } = require("./verification");
 const { BILLING_PERMISSIONS } = require("./billing");
+const { DOCUMENTS_PERMISSIONS } = require("./documents");
+const { PRODUCTS_PERMISSIONS } = require("./products");
 
 const PERMISSIONS = [
   { name: "users.view", module: "users", action: "view", description: "View users" },
@@ -22,6 +24,8 @@ const PERMISSIONS = [
   ...EXPORT_PERMISSIONS,
   ...VERIFICATION_PERMISSIONS,
   ...BILLING_PERMISSIONS,
+  ...DOCUMENTS_PERMISSIONS,
+  ...PRODUCTS_PERMISSIONS,
 ];
 
 const PERMISSION_NAMES = PERMISSIONS.map((permission) => permission.name);

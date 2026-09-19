@@ -40,12 +40,6 @@ router.post("/fx-rates", perm("export.settings.update"), validate(v.createFxRate
 router.patch("/fx-rates/:id", perm("export.settings.update"), validate(v.updateFxRate), catchAsync(controller.updateFxRate));
 router.delete("/fx-rates/:id", perm("export.settings.update"), validate(v.idParam), catchAsync(controller.removeFxRate));
 
-router.get("/products", perm("export.products.view"), validate(v.listProducts), catchAsync(controller.listProducts));
-router.post("/products", perm("export.products.create"), validate(v.createProduct), catchAsync(controller.createProduct));
-router.get("/products/:id", perm("export.products.view"), validate(v.idParam), catchAsync(controller.getProduct));
-router.patch("/products/:id", perm("export.products.update"), validate(v.updateProduct), catchAsync(controller.updateProduct));
-router.delete("/products/:id", perm("export.products.delete"), validate(v.idParam), catchAsync(controller.removeProduct));
-
 router.get("/markets", perm("export.markets.view"), validate(v.listMarkets), catchAsync(controller.listMarkets));
 router.post("/markets", perm("export.markets.create"), validate(v.createMarket), catchAsync(controller.createMarket));
 router.post("/markets/compare", perm("export.markets.view"), validate(v.compareMarkets), catchAsync(controller.compareMarkets));

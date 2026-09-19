@@ -29,6 +29,8 @@ const exportRoutes = require("./modules/export/export.routes");
 const uploadRoutes = require("./modules/uploads/upload.routes");
 const verificationRoutes = require("./modules/verification/verification.routes");
 const billingRoutes = require("./modules/billing/billing.routes");
+const documentRoutes = require("./modules/documents/document.routes");
+const productRoutes = require("./modules/products/product.routes");
 
 function createApp() {
   const app = express();
@@ -49,6 +51,7 @@ function createApp() {
   app.use(helmet());
   app.use(compression());
   app.use(cors(corsOptions()));
+  app.use("/api/v1/documents", express.json({ limit: "8mb" }));
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser(env.COOKIE_SECRET));
   app.use(globalLimiter);
@@ -79,6 +82,8 @@ function createApp() {
   app.use("/api/v1/uploads", uploadRoutes);
   app.use("/api/v1/verification", verificationRoutes);
   app.use("/api/v1/billing", billingRoutes);
+  app.use("/api/v1/documents", documentRoutes);
+  app.use("/api/v1/products", productRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

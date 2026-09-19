@@ -4,9 +4,11 @@ const { connectDb, disconnectDb } = require("../config/db");
 const { seedPermissions } = require("./permissions");
 const { seedRoles } = require("./roles");
 const { seedSuperAdmin } = require("./superAdmin");
-const { seedSampleForm, seedVerificationForm } = require("./forms");
+const { seedSampleForm, seedVerificationForm, seedProductVerificationForm } = require("./forms");
 const { seedExport } = require("./export");
 const { seedBilling } = require("./billing");
+const { seedDocumentTemplates } = require("./documents");
+const { migrateExportProducts } = require("../modules/products/product.migrate");
 
 async function seed() {
   await connectDb(env.MONGO_URI);
@@ -16,7 +18,10 @@ async function seed() {
   const admin = await seedSuperAdmin(superAdminRole);
   await seedSampleForm(admin);
   await seedVerificationForm(admin);
+  await seedProductVerificationForm(admin);
+  await seedDocumentTemplates(admin);
   await seedExport();
+  await migrateExportProducts();
   await seedBilling();
   logger.info({ email: admin.email }, "Seed complete");
   await disconnectDb();

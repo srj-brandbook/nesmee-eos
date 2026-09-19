@@ -12,10 +12,13 @@ const nextConfig = {
     config.resolve.alias["form-engine"] = path.resolve(__dirname, "../shared/form-engine");
     return config;
   },
+  transpilePackages: ["@blocknote/core", "@blocknote/react", "@blocknote/ariakit", "@ariakit/react"],
   async redirects() {
     return [
       { source: "/export/buyers", destination: "/export/distributors", permanent: false },
       { source: "/export/buyers/:path*", destination: "/export/distributors/:path*", permanent: false },
+      { source: "/export/products", destination: "/products", permanent: false },
+      { source: "/export/products/:path*", destination: "/products/:path*", permanent: false },
     ];
   },
   async rewrites() {

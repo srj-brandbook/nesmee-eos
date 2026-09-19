@@ -2,7 +2,7 @@ const { success } = require("../../utils/ApiResponse");
 const verificationService = require("./verification.service");
 
 async function listTemplates(req, res) {
-  const items = await verificationService.listTemplates();
+  const items = await verificationService.listTemplates(req.query);
   return success(res, { message: "Verification templates fetched", data: { items } });
 }
 
@@ -66,6 +66,11 @@ async function summaryForLead(req, res) {
   return success(res, { message: "Supplier verification fetched", data });
 }
 
+async function summaryForProduct(req, res) {
+  const data = await verificationService.summaryForProduct(req.params.productId, req);
+  return success(res, { message: "Product verification fetched", data });
+}
+
 module.exports = {
   listTemplates,
   assignees,
@@ -80,4 +85,5 @@ module.exports = {
   reviewDocument,
   reviewCase,
   summaryForLead,
+  summaryForProduct,
 };

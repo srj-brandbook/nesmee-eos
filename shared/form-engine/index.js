@@ -16,6 +16,7 @@ const summarizeRule = require("./rules/summarizeRule");
 const { validateFormConfiguration } = require("./configurationValidator");
 const { createSupplierOnboardingTemplate } = require("./templates/supplierOnboarding");
 const { createFrozenFoodPermitTemplate } = require("./templates/frozenFoodPermit");
+const { createProductComplianceTemplate } = require("./templates/productCompliance");
 
 module.exports = {
   ...ids,
@@ -44,4 +45,5 @@ module.exports = {
   validateFormConfiguration,
   createSupplierOnboardingTemplate,
   createFrozenFoodPermitTemplate,
+  createProductComplianceTemplate,
 };

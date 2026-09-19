@@ -7,6 +7,13 @@ const {
   LOGISTICS_MANAGER_PERMISSIONS,
 } = require("../constants/export");
 const { COMPLIANCE_VERIFICATION_PERMISSIONS, SALES_VERIFICATION_PERMISSIONS } = require("../constants/verification");
+const { COMPLIANCE_DOCUMENTS_PERMISSIONS, SALES_DOCUMENTS_PERMISSIONS } = require("../constants/documents");
+const {
+  SALES_PRODUCTS_PERMISSIONS,
+  COMPLIANCE_PRODUCTS_PERMISSIONS,
+  EXPORT_MANAGER_PRODUCTS_PERMISSIONS,
+  FINANCE_PRODUCTS_PERMISSIONS,
+} = require("../constants/products");
 const {
   FINANCE_BILLING_PERMISSIONS,
   COMPLIANCE_BILLING_PERMISSIONS,
@@ -22,7 +29,9 @@ async function seedRoles(permissions) {
       (permission) =>
         SALES_PERMISSION_NAMES.includes(permission.name) ||
         SALES_VERIFICATION_PERMISSIONS.includes(permission.name) ||
-        SALES_BILLING_PERMISSIONS.includes(permission.name)
+        SALES_BILLING_PERMISSIONS.includes(permission.name) ||
+        SALES_DOCUMENTS_PERMISSIONS.includes(permission.name) ||
+        SALES_PRODUCTS_PERMISSIONS.includes(permission.name)
     )
     .map((permission) => permission._id);
 
@@ -63,7 +72,12 @@ async function seedRoles(permissions) {
       name: "Export Manager",
       slug: "export-manager",
       description: "Owns export markets, corridors, opportunities, and analytics",
-      permissionIds: permissions.filter((permission) => EXPORT_MANAGER_PERMISSIONS.includes(permission.name)).map((permission) => permission._id),
+      permissionIds: permissions
+        .filter(
+          (permission) =>
+            EXPORT_MANAGER_PERMISSIONS.includes(permission.name) || EXPORT_MANAGER_PRODUCTS_PERMISSIONS.includes(permission.name)
+        )
+        .map((permission) => permission._id),
       isSystem: true,
       isSuperAdmin: false,
     },
@@ -77,6 +91,8 @@ async function seedRoles(permissions) {
             COMPLIANCE_MANAGER_PERMISSIONS.includes(permission.name) ||
             COMPLIANCE_VERIFICATION_PERMISSIONS.includes(permission.name) ||
             COMPLIANCE_BILLING_PERMISSIONS.includes(permission.name) ||
+            COMPLIANCE_DOCUMENTS_PERMISSIONS.includes(permission.name) ||
+            COMPLIANCE_PRODUCTS_PERMISSIONS.includes(permission.name) ||
             permission.name === "leads.view"
         )
         .map((permission) => permission._id),
@@ -92,6 +108,7 @@ async function seedRoles(permissions) {
           (permission) =>
             FINANCE_PERMISSIONS.includes(permission.name) ||
             FINANCE_BILLING_PERMISSIONS.includes(permission.name) ||
+            FINANCE_PRODUCTS_PERMISSIONS.includes(permission.name) ||
             permission.name === "leads.view"
         )
         .map((permission) => permission._id),

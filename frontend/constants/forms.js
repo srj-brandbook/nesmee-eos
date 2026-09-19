@@ -3,6 +3,7 @@ export const FORM_PURPOSES = [
   { value: "supplier_onboarding", label: "Supplier onboarding" },
   { value: "distributor_onboarding", label: "Distributor onboarding" },
   { value: "supplier_verification", label: "Supplier verification" },
+  { value: "product_verification", label: "Product verification" },
 ];
 
 export const ONBOARDING_STATUSES = [

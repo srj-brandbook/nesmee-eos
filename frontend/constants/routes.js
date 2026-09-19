@@ -25,10 +25,10 @@ export const ROUTES = {
   forms: "/forms",
   onboarding: "/onboarding",
   verification: "/verification",
+  products: "/products",
   export: "/export",
   exportMarkets: "/export/markets",
   exportCorridors: "/export/corridors",
-  exportProducts: "/export/products",
   exportDistributors: "/export/distributors",
   exportBuyers: "/export/distributors",
   exportOpportunities: "/export/opportunities",
@@ -43,6 +43,8 @@ export const ROUTES = {
   billingInvoices: "/billing/invoices",
   billingPayments: "/billing/payments",
   billingSettings: "/settings/billing",
+  documents: "/documents",
+  documentTemplates: "/documents/templates",
 };
 
 export function verificationCasePath(id) {
@@ -62,6 +64,19 @@ export function isFormBuilderPath(pathname) {
   if (segments[0] !== "forms" || segments.length < 2 || segments[1] === "new") return false;
   if (segments.length === 2) return true;
   return segments[2] === "rules";
+}
+
+export function isDocumentStudioPath(pathname) {
+  if (!pathname?.startsWith("/documents/")) return false;
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments[0] !== "documents" || segments.length < 2) return false;
+  if (segments.includes("print") || segments[1] === "new") return false;
+  if (segments[1] === "templates") return segments.length === 3;
+  return segments.length === 2;
+}
+
+export function isImmersiveEditorPath(pathname) {
+  return isFormBuilderPath(pathname) || isDocumentStudioPath(pathname);
 }
 
 export function directoryProfilePath(subjectType, subjectId) {
@@ -95,6 +110,8 @@ export const APP_PREFIXES = [
   "/forms",
   "/onboarding",
   "/verification",
+  "/products",
   "/export",
   "/billing",
+  "/documents",
 ];

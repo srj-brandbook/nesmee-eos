@@ -76,6 +76,7 @@ async function list(query) {
   if (query.stage) filter.stage = query.stage;
   if (query.source) filter.source = query.source;
   if (query.ownerId) filter.ownerId = query.ownerId;
+  if (query.verificationStatus) filter.verificationStatus = query.verificationStatus;
   if (query.country) filter.country = { $regex: query.country, $options: "i" };
   if (query.search) {
     filter.$or = [

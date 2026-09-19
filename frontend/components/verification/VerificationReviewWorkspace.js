@@ -109,7 +109,8 @@ export function VerificationReviewWorkspace() {
   const canReview = REVIEWABLE_CASE_STATUSES.includes(item.status) && !ownSubmission;
   const progress = documentReviewProgress(item.documents || []);
   const canApprove = progress.remaining === 0 && progress.returned === 0;
-  const supplierHref = item.lead?.stage === "won" ? `${ROUTES.suppliers}/${item.leadId}` : `${ROUTES.leads}/${item.leadId}`;
+  const subjectHref = item.productId ? `${ROUTES.products}/${item.productId}` : item.lead?.stage === "won" ? `${ROUTES.suppliers}/${item.leadId}` : `${ROUTES.leads}/${item.leadId}`;
+  const subjectName = item.product?.name || item.lead?.name || "Subject";
   const tabs = TABS.map((entry) => ({
     ...entry,
     count: entry.value === "documents" ? (item.documents || []).length : undefined,
@@ -133,8 +134,8 @@ export function VerificationReviewWorkspace() {
             </Link>
             {" · Review"}
             {" · "}
-            <Link href={supplierHref} className="hover:text-text">
-              {item.lead?.name || "Supplier"}
+            <Link href={subjectHref} className="hover:text-text">
+              {subjectName}
             </Link>
           </p>
           <h1 className="font-display text-2xl font-semibold">{item.title}</h1>

@@ -199,7 +199,8 @@ export function VerificationWorkspace() {
   if (canReviewSubmitted) return <Spinner label="Opening review" />;
 
   const readOnly = !canFill;
-  const supplierHref = item.lead?.stage === "won" ? `${ROUTES.suppliers}/${item.leadId}` : `${ROUTES.leads}/${item.leadId}`;
+  const subjectHref = item.productId ? `${ROUTES.products}/${item.productId}` : item.lead?.stage === "won" ? `${ROUTES.suppliers}/${item.leadId}` : `${ROUTES.leads}/${item.leadId}`;
+  const subjectName = item.product?.name || item.lead?.name || "Subject";
   const unlocked = started || item.status !== "assigned";
   const tabs = TABS.map((entry) => ({
     ...entry,
@@ -225,8 +226,8 @@ export function VerificationWorkspace() {
             </Link>
             {" · Submission"}
             {" · "}
-            <Link href={supplierHref} className="hover:text-text">
-              {item.lead?.name || "Supplier"}
+            <Link href={subjectHref} className="hover:text-text">
+              {subjectName}
             </Link>
           </p>
           <h1 className="font-display text-2xl font-semibold">{item.title}</h1>

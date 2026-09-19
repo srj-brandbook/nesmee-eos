@@ -62,6 +62,7 @@ function serializeDocument(doc) {
     id: String(source._id),
     caseId: idOf(source.caseId),
     leadId: idOf(source.leadId),
+    productId: idOf(source.productId),
     documentKey: source.documentKey,
     label: source.label || source.title || source.documentKey,
     title: source.title || "",
@@ -92,6 +93,10 @@ function serializeCase(item, extras = {}) {
   return {
     id: String(source._id),
     leadId: idOf(source.leadId),
+    subjectType: source.subjectType || (source.productId ? "product" : "lead"),
+    subjectId: idOf(source.subjectId) || idOf(source.productId) || idOf(source.leadId),
+    productId: idOf(source.productId),
+    product: extras.product || (source.productId?.name ? { id: idOf(source.productId), name: source.productId.name, sku: source.productId.sku || "" } : null),
     lead: extras.lead || serializePerson(source.leadId) || (source.leadId?.name ? { id: idOf(source.leadId), name: source.leadId.name, stage: source.leadId.stage } : null),
     formId: idOf(source.formId),
     form: extras.form || (source.formId?.name ? { id: idOf(source.formId), name: source.formId.name, purpose: source.formId.purpose } : null),

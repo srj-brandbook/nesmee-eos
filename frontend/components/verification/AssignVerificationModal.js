@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Button } from "@/components/ui/Button";
 import { ApiClientError } from "@/lib/api/apiClient";
 
-export function AssignVerificationModal({ open, leadId, onClose, onAssigned }) {
+export function AssignVerificationModal({ open, leadId, productId, purpose = "supplier_verification", onClose, onAssigned }) {
   const toast = useToast();
   const { user } = useAuth();
   const [templates, setTemplates] = useState([]);
@@ -28,7 +28,7 @@ export function AssignVerificationModal({ open, leadId, onClose, onAssigned }) {
     setAssignedToId(user?.id || "");
     setDueAt("");
     setNote("");
-    Promise.all([verificationService.templates(), verificationService.assignees()])
+    Promise.all([verificationService.templates({ purpose }), verificationService.assignees()])
       .then(([templateRes, assigneeRes]) => {
         const items = templateRes.data.items || [];
         setTemplates(items);
@@ -36,18 +36,19 @@ export function AssignVerificationModal({ open, leadId, onClose, onAssigned }) {
         setAssignees(assigneeRes.data.items || []);
       })
       .catch(() => toast.error("Unable to load verification templates"));
-  }, [open, user?.id]);
+  }, [open, user?.id, purpose]);
 
   async function submit(event) {
     event.preventDefault();
     if (!formId) {
-      toast.error("Publish a supplier verification form first");
+      toast.error(purpose === "product_verification" ? "Publish a product verification form first" : "Publish a supplier verification form first");
       return;
     }
     setSaving(true);
     try {
       await verificationService.create({
-        leadId,
+        leadId: productId ? undefined : leadId,
+        productId: productId || undefined,
         formId,
         assignedToId: assignedToId || user?.id,
         dueAt: dueAt || null,

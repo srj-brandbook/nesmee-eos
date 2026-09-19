@@ -4,6 +4,9 @@ const { VERIFICATION_CASE_STATUSES } = require("../constants/verification");
 const verificationCaseSchema = new mongoose.Schema(
   {
     leadId: { type: mongoose.Schema.Types.ObjectId, ref: "Lead", required: true, index: true },
+    subjectType: { type: String, enum: ["lead", "product"], default: "lead", index: true },
+    subjectId: { type: mongoose.Schema.Types.ObjectId, default: null, index: true },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: null, index: true },
     formId: { type: mongoose.Schema.Types.ObjectId, ref: "FormDefinition", required: true, index: true },
     versionId: { type: mongoose.Schema.Types.ObjectId, ref: "FormVersion", required: true },
     title: { type: String, required: true, trim: true },
@@ -37,6 +40,8 @@ const verificationCaseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+verificationCaseSchema.index({ productId: 1, status: 1, updatedAt: -1 });
+verificationCaseSchema.index({ subjectType: 1, status: 1, updatedAt: -1 });
 verificationCaseSchema.index({ assignedToId: 1, status: 1, updatedAt: -1 });
 verificationCaseSchema.index({ leadId: 1, status: 1, updatedAt: -1 });
 verificationCaseSchema.index({ leadId: 1, formId: 1, status: 1 });

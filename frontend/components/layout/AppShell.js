@@ -11,7 +11,7 @@ import { CommandPalette } from "./CommandPalette";
 import { Header } from "./Header";
 import { Sidebar, SidebarNav } from "./Sidebar";
 import { Breadcrumbs } from "./Breadcrumbs";
-import { isFormBuilderPath } from "@/constants/routes";
+import { isImmersiveEditorPath } from "@/constants/routes";
 
 const COLLAPSE_KEY = "sidebar-collapsed";
 
@@ -19,12 +19,12 @@ export function AppShell({ children }) {
   const pathname = usePathname();
   const isPrintPath = pathname?.includes("/print");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(() => isFormBuilderPath(pathname));
+  const [collapsed, setCollapsed] = useState(() => isImmersiveEditorPath(pathname));
   const [commandOpen, setCommandOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(COLLAPSE_KEY) === "true";
-    setCollapsed(isFormBuilderPath(pathname) ? true : stored);
+    setCollapsed(isImmersiveEditorPath(pathname) ? true : stored);
   }, [pathname]);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 const ExportPricing = require("../../models/ExportPricing");
-const ExportProduct = require("../../models/ExportProduct");
+const Product = require("../../models/Product");
 const ExportMarket = require("../../models/ExportMarket");
 const ExportCorridor = require("../../models/ExportCorridor");
 const ExportBuyer = require("../../models/ExportBuyer");
@@ -90,7 +90,7 @@ async function resolvePrice({ productId, marketId, buyerId, quantity, at = new D
 
 async function calculate(payload, actor, req) {
   const quantity = Number(payload.quantity || 1);
-  const product = payload.productId ? await ExportProduct.findOne(notDeleted({ _id: payload.productId })).lean() : null;
+  const product = payload.productId ? await Product.findOne(notDeleted({ _id: payload.productId })).lean() : null;
   const market = payload.marketId ? await ExportMarket.findOne(notDeleted({ _id: payload.marketId })).lean() : null;
   const corridor = payload.corridorId ? await ExportCorridor.findOne(notDeleted({ _id: payload.corridorId })).lean() : null;
   const settings = (await ExportSettings.findOne({ key: "export" }).lean()) || { baseCurrency: "INR", defaultIncoterm: "FOB" };

@@ -3,7 +3,7 @@ const { PRICING_TYPES, PRICING_STATUSES } = require("../constants/export");
 
 const exportPricingSchema = new mongoose.Schema(
   {
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportProduct", required: true },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
     marketId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportMarket", required: true },
     buyerId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportBuyer", default: null },
     currency: { type: String, default: "USD", trim: true, uppercase: true },

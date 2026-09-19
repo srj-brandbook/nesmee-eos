@@ -55,11 +55,16 @@ function NewFormInner() {
                 setName("Frozen food processing permit");
                 setPurpose("supplier_verification");
               }
+              if (next === "product_compliance") {
+                setName("Product compliance pack");
+                setPurpose("product_verification");
+              }
             }}
           >
             <option value="blank">Blank form</option>
             <option value="supplier_onboarding">Supplier onboarding</option>
             <option value="frozen_food_permit">Frozen food processing permit</option>
+            <option value="product_compliance">Product compliance pack</option>
           </Select>
           <Select label="Purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)}>
             {FORM_PURPOSES.map((item) => (

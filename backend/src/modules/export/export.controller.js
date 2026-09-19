@@ -114,31 +114,6 @@ async function removeFxRate(req, res) {
   return success(res, { message: "FX rate deleted", data: null });
 }
 
-async function listProducts(req, res) {
-  const data = await productService.listProducts(req.query, req);
-  return success(res, { message: "Products fetched", data });
-}
-
-async function getProduct(req, res) {
-  const product = await productService.getProduct(req.params.id, req);
-  return success(res, { message: "Product fetched", data: { product } });
-}
-
-async function createProduct(req, res) {
-  const product = await productService.createProduct(req.body, req.user, req);
-  return success(res, { message: "Product created", data: { product }, status: 201 });
-}
-
-async function updateProduct(req, res) {
-  const product = await productService.updateProduct(req.params.id, req.body, req.user, req);
-  return success(res, { message: "Product updated", data: { product } });
-}
-
-async function removeProduct(req, res) {
-  await productService.removeProduct(req.params.id, req.user, req);
-  return success(res, { message: "Product deleted", data: null });
-}
-
 async function listMarkets(req, res) {
   const data = await marketService.listMarkets(req.query, req);
   return success(res, { message: "Markets fetched", data });
@@ -467,11 +442,6 @@ module.exports = {
   createFxRate,
   updateFxRate,
   removeFxRate,
-  listProducts,
-  getProduct,
-  createProduct,
-  updateProduct,
-  removeProduct,
   listMarkets,
   getMarket,
   createMarket,

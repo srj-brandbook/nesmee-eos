@@ -16,6 +16,7 @@ import {
   Clock,
   Copy,
   Factory,
+  FileStack,
   Globe,
   History,
   Layers,
@@ -50,6 +51,8 @@ import { ContactPanel } from "./ContactPanel";
 import { OnboardingPanel } from "@/components/onboarding/OnboardingPanel";
 import { VerificationPanel } from "@/components/verification/VerificationPanel";
 import { SupplierBillingPanel } from "@/components/billing/SupplierBillingPanel";
+import { SubjectDocumentsPanel } from "@/components/documents/SubjectDocumentsPanel";
+import { SupplierProductsPanel } from "@/components/products/SupplierProductsPanel";
 import { LeadStatusModal } from "./LeadStatusModal";
 import { LeadStagePipeline } from "./LeadStagePipeline";
 import { LeadOverview } from "./LeadOverview";
@@ -75,9 +78,11 @@ import { formatDate, formatDateTime } from "@/lib/utils";
 
 const SECTION_TABS = [
   { value: "overview", label: "Overview", icon: LayoutDashboard },
+  { value: "products", label: "Products", icon: Package },
   { value: "onboarding", label: "Onboarding", icon: ClipboardCheck },
   { value: "verification", label: "Verification", icon: ShieldCheck },
   { value: "services", label: "Services", icon: Briefcase },
+  { value: "documents", label: "Documents", icon: FileStack },
   { value: "history", label: "History", icon: History },
   { value: "tasks", label: "Tasks", icon: ListTodo },
   { value: "contacts", label: "Contacts", icon: Users },
@@ -222,7 +227,11 @@ export function LeadDetail({ leadId, variant = "sourcing" }) {
     setActivityFilter(item.type);
   }
 
-  const tabs = SECTION_TABS.map((item) => ({
+  const tabs = SECTION_TABS.filter((item) => {
+    if (item.value === "documents") return can(PERMISSIONS.DOCUMENTS_VIEW);
+    if (item.value === "products") return can(PERMISSIONS.PRODUCTS_VIEW);
+    return true;
+  }).map((item) => ({
     ...item,
     count: item.value === "overview" || !counts[item.value] ? undefined : counts[item.value],
   }));
@@ -367,6 +376,7 @@ export function LeadDetail({ leadId, variant = "sourcing" }) {
             />
           ) : null}
 
+          {tab === "products" ? <SupplierProductsPanel supplierId={leadId} canCreate={lead.stage === "won" && lead.verificationStatus === "verified"} /> : null}
           {tab === "onboarding" ? (
             <OnboardingPanel
               subjectType="lead"
@@ -379,6 +389,7 @@ export function LeadDetail({ leadId, variant = "sourcing" }) {
 
           {tab === "verification" ? <VerificationPanel leadId={leadId} leadStage={lead.stage} /> : null}
           {tab === "services" ? <SupplierBillingPanel leadId={leadId} /> : null}
+          {tab === "documents" ? <SubjectDocumentsPanel subjectType="lead" subjectId={leadId} /> : null}
 
           {tab === "history" ? (
             <LeadHistory

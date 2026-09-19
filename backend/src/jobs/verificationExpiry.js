@@ -3,7 +3,7 @@ const VerificationCase = require("../models/VerificationCase");
 const Lead = require("../models/Lead");
 const logger = require("../config/logger");
 const notificationService = require("../modules/notifications/notification.service");
-const { recomputeLeadRollup, startOfDay, addDays } = require("../modules/verification/verification.service");
+const { recomputeLeadRollup, recomputeProductRollup, startOfDay, addDays } = require("../modules/verification/verification.service");
 const { EXPIRING_SOON_DAYS } = require("../constants/verification");
 
 function noticeKey(days) {
@@ -44,6 +44,7 @@ async function processVerificationExpiry(now = new Date()) {
   let expired = 0;
   let notified = 0;
   const leadIds = new Set();
+  const productIds = new Set();
 
   for (const doc of docs) {
     const expires = startOfDay(doc.expiresAt);
@@ -68,6 +69,7 @@ async function processVerificationExpiry(now = new Date()) {
         await caseDoc.save();
       }
       leadIds.add(String(doc.leadId));
+      if (doc.productId) productIds.add(String(doc.productId));
       expired += 1;
       continue;
     }
@@ -86,6 +88,9 @@ async function processVerificationExpiry(now = new Date()) {
 
   for (const leadId of leadIds) {
     await recomputeLeadRollup(leadId);
+  }
+  for (const productId of productIds) {
+    await recomputeProductRollup(productId);
   }
 
   if (expired || notified) logger.info({ expired, notified }, "Verification expiry job ran");

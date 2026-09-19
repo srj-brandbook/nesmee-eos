@@ -5,7 +5,7 @@ const exportOpportunitySchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     marketId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportMarket", default: null },
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportProduct", default: null },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: null },
     buyerId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportBuyer", default: null },
     corridorId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportCorridor", default: null },
     expectedVolume: { type: Number, default: 0 },

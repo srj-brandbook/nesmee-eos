@@ -20,6 +20,8 @@ const listSchema = Joi.object({
     search: Joi.string().allow(""),
     status: Joi.string().valid(...VERIFICATION_CASE_STATUSES),
     leadId: objectId,
+    productId: objectId,
+    subjectType: Joi.string().valid("lead", "product"),
     formId: objectId,
     assignedTo: Joi.alternatives().try(Joi.string().valid("me", "all"), objectId),
     expiring: Joi.string().valid("true", "false"),
@@ -37,20 +39,27 @@ const leadParamSchema = Joi.object({
   params: Joi.object({ leadId: objectId.required() }).required(),
 });
 
+const productParamSchema = Joi.object({
+  params: Joi.object({ productId: objectId.required() }).required(),
+});
+
 const documentParamSchema = Joi.object({
   params: Joi.object({ id: objectId.required() }).required(),
 });
 
 const createSchema = Joi.object({
   body: Joi.object({
-    leadId: objectId.required(),
+    leadId: objectId,
+    productId: objectId,
     formId: objectId.required(),
     assignedToId: objectId.allow("", null),
     dueAt: Joi.date().allow(null, ""),
     note: Joi.string().allow("").max(2000),
     title: Joi.string().trim().max(160),
     description: Joi.string().allow("").max(2000),
-  }).required(),
+  })
+    .or("leadId", "productId")
+    .required(),
 });
 
 const saveSchema = Joi.object({
@@ -109,6 +118,7 @@ module.exports = {
   listSchema,
   idParamSchema,
   leadParamSchema,
+  productParamSchema,
   documentParamSchema,
   createSchema,
   saveSchema,

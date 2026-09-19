@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const exportCostEstimateSchema = new mongoose.Schema(
   {
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportProduct", default: null },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: null },
     marketId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportMarket", default: null },
     corridorId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportCorridor", default: null },
     buyerId: { type: mongoose.Schema.Types.ObjectId, ref: "ExportBuyer", default: null },

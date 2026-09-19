@@ -33,6 +33,7 @@ const verificationDocumentSchema = new mongoose.Schema(
   {
     caseId: { type: mongoose.Schema.Types.ObjectId, ref: "VerificationCase", required: true, index: true },
     leadId: { type: mongoose.Schema.Types.ObjectId, ref: "Lead", required: true, index: true },
+    productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", default: null, index: true },
     documentKey: { type: String, required: true, trim: true },
     label: { type: String, default: "", trim: true },
     title: { type: String, default: "", trim: true },

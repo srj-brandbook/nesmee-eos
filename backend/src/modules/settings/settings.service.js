@@ -12,6 +12,17 @@ async function get() {
     supportEmail: settings.supportEmail,
     signupEnabled: settings.signupEnabled,
     maintenanceMode: settings.maintenanceMode,
+    legalName: settings.legalName || "",
+    address: settings.address || "",
+    city: settings.city || "",
+    state: settings.state || "",
+    pincode: settings.pincode || "",
+    country: settings.country || "",
+    gstin: settings.gstin || "",
+    logoUrl: settings.logoUrl || "",
+    logoPublicId: settings.logoPublicId || "",
+    signatoryName: settings.signatoryName || "",
+    signatoryTitle: settings.signatoryTitle || "",
     updatedAt: settings.updatedAt,
   };
 }

@@ -3,10 +3,12 @@ const VerificationDocument = require("../../models/VerificationDocument");
 const FormDefinition = require("../../models/FormDefinition");
 const FormVersion = require("../../models/FormVersion");
 const Lead = require("../../models/Lead");
+const Product = require("../../models/Product");
 const User = require("../../models/User");
 const ApiError = require("../../utils/ApiError");
 const { parsePagination, paginationMeta, parseSort } = require("../../utils/pagination");
 const { serializeCase, serializeDocument, serializePerson, serializeLeadRef } = require("../../utils/verificationSerializer");
+const productService = require("../products/product.service");
 const { definitionFromVersion } = require("../forms/form.service");
 const auditService = require("../audit/audit.service");
 const notificationService = require("../notifications/notification.service");
@@ -217,16 +219,29 @@ async function loadAssignableLead(leadId) {
   return lead;
 }
 
-async function loadPublishedVerificationForm(formId) {
+async function loadPublishedVerificationForm(formId, expectedPurpose = "supplier_verification") {
   const form = await FormDefinition.findOne(notDeleted({ _id: formId }));
   if (!form) throw ApiError.notFound("Form not found");
-  if (form.purpose !== "supplier_verification") {
-    throw ApiError.badRequest("Only published supplier verification forms can be assigned");
+  if (form.purpose !== expectedPurpose) {
+    throw ApiError.badRequest(
+      expectedPurpose === "product_verification"
+        ? "Only published product verification forms can be assigned"
+        : "Only published supplier verification forms can be assigned"
+    );
   }
   if (!form.currentPublishedVersionId) throw ApiError.conflict("Publish the verification form before assigning it");
   const version = await FormVersion.findById(form.currentPublishedVersionId);
   if (!version || version.status !== "published") throw ApiError.conflict("Publish the verification form before assigning it");
   return { form, version };
+}
+
+async function loadAssignableProduct(productId) {
+  const product = await Product.findOne(notDeleted({ _id: productId }));
+  if (!product) throw ApiError.notFound("Product not found");
+  if (product.status === "archived") throw ApiError.conflict("Archived products cannot be verified");
+  if (!product.supplierId) throw ApiError.badRequest("Assign a verified supplier before starting product verification");
+  await productService.loadAssignableSupplier(product.supplierId);
+  return product;
 }
 
 function definitionOf(version, form) {
@@ -269,6 +284,7 @@ async function upsertDocuments(verificationCase, version, derived, values = {}, 
       doc = await VerificationDocument.create({
         caseId: verificationCase._id,
         leadId: verificationCase.leadId,
+        productId: verificationCase.productId || null,
         documentKey: key,
         label: defaults.label,
         description: defaults.description,
@@ -385,8 +401,10 @@ async function refreshCaseStatus(verificationCase, documents) {
 }
 
 async function recomputeLeadRollup(leadId) {
-  const cases = await VerificationCase.find(notDeleted({ leadId, status: { $ne: "cancelled" } })).lean();
-  const documents = await VerificationDocument.find(notDeleted({ leadId })).lean();
+  const cases = await VerificationCase.find(
+    notDeleted({ leadId, status: { $ne: "cancelled" }, subjectType: { $ne: "product" } })
+  ).lean();
+  const documents = await VerificationDocument.find(notDeleted({ leadId, productId: null })).lean();
   const docsByCase = {};
   for (const doc of documents) {
     const key = String(doc.caseId);
@@ -428,6 +446,73 @@ async function recomputeLeadRollup(leadId) {
   return { verificationStatus: status, verificationSummary: summary };
 }
 
+async function recomputeProductRollup(productId) {
+  if (!productId) return null;
+  const cases = await VerificationCase.find(notDeleted({ productId, status: { $ne: "cancelled" } })).lean();
+  const documents = await VerificationDocument.find(notDeleted({ productId })).lean();
+  const docsByCase = {};
+  for (const doc of documents) {
+    const key = String(doc.caseId);
+    if (!docsByCase[key]) docsByCase[key] = [];
+    docsByCase[key].push(doc);
+  }
+
+  const summary = { required: 0, verified: 0, pending: 0, expired: 0, expiringSoon: 0 };
+  let status = "none";
+  const rank = { expired: 4, rejected: 3, pending: 2, verified: 1, none: 0 };
+
+  for (const item of cases) {
+    const counts = documentCounts(docsByCase[String(item._id)] || []);
+    summary.required += counts.required;
+    summary.verified += counts.verified;
+    summary.pending += counts.pending;
+    summary.expired += counts.expired;
+    summary.expiringSoon += counts.expiringSoon;
+
+    let caseStatus = "pending";
+    if (item.status === "expired" || counts.expired) caseStatus = "expired";
+    else if (item.status === "rejected" || counts.rejected) caseStatus = "rejected";
+    else if (item.status === "verified") caseStatus = "verified";
+    else caseStatus = "pending";
+    if (rank[caseStatus] > rank[status]) status = caseStatus;
+  }
+
+  if (!cases.length) status = "none";
+
+  const product = await Product.findById(productId);
+  if (!product || product.deletedAt) return { verificationStatus: status, verificationSummary: summary };
+
+  const next = {
+    verificationStatus: status,
+    verificationSummary: summary,
+  };
+  if (product.status !== "archived") {
+    if (status === "verified" && ["draft", "in_verification", "rejected"].includes(product.status)) {
+      next.status = "verified";
+    } else if (status === "rejected") {
+      next.status = "rejected";
+      if (product.listingStatus === "listed") {
+        next.listingStatus = "unlisted";
+        product.listingStatus = "unlisted";
+        await productService.revokeOpenShares(product, null, "Product verification returned");
+      }
+    } else if ((status === "pending" || status === "expired") && product.listingStatus !== "listed") {
+      next.status = "in_verification";
+    } else if (status === "none" && product.origin !== "migrated" && product.listingStatus !== "listed") {
+      next.status = "draft";
+    }
+  }
+
+  await Product.updateOne({ _id: productId }, { $set: next });
+  return { verificationStatus: status, verificationSummary: summary };
+}
+
+async function syncRollups(item) {
+  if (item?.productId) return recomputeProductRollup(item.productId);
+  if (item?.leadId) return recomputeLeadRollup(item.leadId);
+  return null;
+}
+
 async function notifyUsers(userIds, payload) {
   const unique = [...new Set(userIds.filter(Boolean).map((id) => String(id)))];
   for (const userId of unique) {
@@ -436,10 +521,14 @@ async function notifyUsers(userIds, payload) {
 }
 
 async function hydrate(verificationCase, extras = {}) {
-  const [form, version, lead, assignedTo, createdBy, submitter, reviewer, documents] = await Promise.all([
+  const [form, version, lead, product, assignedTo, createdBy, submitter, reviewer, documents] = await Promise.all([
     extras.form || (verificationCase.formId ? FormDefinition.findById(verificationCase.formId).select("name key purpose status").lean() : null),
     extras.version || (verificationCase.versionId ? FormVersion.findById(verificationCase.versionId).lean() : null),
     extras.lead || Lead.findById(verificationCase.leadId).select("name legalName stage email verificationStatus verificationSummary").lean(),
+    extras.product ||
+      (verificationCase.productId
+        ? Product.findById(verificationCase.productId).select("name sku category listingStatus verificationStatus supplierId").lean()
+        : null),
     extras.assignedTo || User.findById(verificationCase.assignedToId).select("name email avatarUrl").lean(),
     extras.createdBy || (verificationCase.createdBy ? User.findById(verificationCase.createdBy).select("name email avatarUrl").lean() : null),
     extras.submitter || (verificationCase.submittedBy ? User.findById(verificationCase.submittedBy).select("name email avatarUrl").lean() : null),
@@ -463,6 +552,9 @@ async function hydrate(verificationCase, extras = {}) {
   }));
   return serializeCase(caseSource, {
     lead: serializeLeadRef(lead),
+    product: product
+      ? { id: String(product._id), name: product.name, sku: product.sku || "", category: product.category || "", listingStatus: product.listingStatus, verificationStatus: product.verificationStatus }
+      : null,
     form: form ? { id: String(form._id), name: form.name, purpose: form.purpose } : null,
     assignedTo: serializePerson(assignedTo),
     createdBy: serializePerson(createdBy),
@@ -474,9 +566,10 @@ async function hydrate(verificationCase, extras = {}) {
   });
 }
 
-async function listTemplates() {
+async function listTemplates(query = {}) {
+  const purpose = query.purpose || "supplier_verification";
   const forms = await FormDefinition.find(
-    notDeleted({ purpose: "supplier_verification", status: "published", currentPublishedVersionId: { $ne: null } })
+    notDeleted({ purpose, status: "published", currentPublishedVersionId: { $ne: null } })
   )
     .sort({ name: 1 })
     .lean();
@@ -514,6 +607,8 @@ async function list(query, req) {
   const filter = notDeleted();
   if (query.status) filter.status = query.status;
   if (query.leadId) filter.leadId = query.leadId;
+  if (query.productId) filter.productId = query.productId;
+  if (query.subjectType) filter.subjectType = query.subjectType;
   if (query.formId) filter.formId = query.formId;
   if (query.assignedTo === "me" || (!query.assignedTo && !actorCan(req, "verification.view"))) {
     filter.assignedToId = req.user._id;
@@ -545,6 +640,7 @@ async function list(query, req) {
   const [items, total] = await Promise.all([
     VerificationCase.find(filter)
       .populate("leadId", "name legalName stage email")
+      .populate("productId", "name sku category")
       .populate("assignedToId", "name email avatarUrl")
       .populate("submittedBy", "name email avatarUrl")
       .populate("formId", "name purpose")
@@ -571,6 +667,9 @@ async function list(query, req) {
     items: items.map((item) =>
       serializeCase(item, {
         lead: serializeLeadRef(item.leadId),
+        product: item.productId
+          ? { id: String(item.productId._id || item.productId), name: item.productId.name, sku: item.productId.sku || "", category: item.productId.category || "" }
+          : null,
         assignedTo: serializePerson(item.assignedToId),
         submitter: serializePerson(item.submittedBy),
         form: item.formId ? { id: String(item.formId._id), name: item.formId.name, purpose: item.formId.purpose } : null,
@@ -582,22 +681,46 @@ async function list(query, req) {
 }
 
 async function create(payload, actor, req) {
-  const lead = await loadAssignableLead(payload.leadId);
-  const { form, version } = await loadPublishedVerificationForm(payload.formId);
+  if (payload.productId) {
+    if (!actorCan(req, "verification.assign") && !actorCan(req, "products.submit")) throw ApiError.forbidden();
+  } else if (!actorCan(req, "verification.assign")) {
+    throw ApiError.forbidden();
+  }
+  let lead;
+  let product = null;
+  let subjectType = "lead";
+  let expectedPurpose = "supplier_verification";
+  if (payload.productId) {
+    product = await loadAssignableProduct(payload.productId);
+    lead = await Lead.findOne(notDeleted({ _id: product.supplierId }));
+    if (!lead) throw ApiError.badRequest("Assign a verified supplier before starting product verification");
+    subjectType = "product";
+    expectedPurpose = "product_verification";
+  } else {
+    lead = await loadAssignableLead(payload.leadId);
+  }
+  const { form, version } = await loadPublishedVerificationForm(payload.formId, expectedPurpose);
   const assignedToId = payload.assignedToId || actor._id;
   await loadActiveUser(assignedToId);
 
-  const blocking = await VerificationCase.findOne(
-    notDeleted({ leadId: lead._id, formId: form._id, status: { $in: BLOCKING_CASE_STATUSES } })
-  );
+  const blockingQuery =
+    subjectType === "product"
+      ? notDeleted({ productId: product._id, formId: form._id, status: { $in: BLOCKING_CASE_STATUSES } })
+      : notDeleted({ leadId: lead._id, formId: form._id, status: { $in: BLOCKING_CASE_STATUSES }, subjectType: { $ne: "product" } });
+  const blocking = await VerificationCase.findOne(blockingQuery);
   if (blocking) {
-    throw ApiError.conflict("This supplier already has an open verification for that form");
+    throw ApiError.conflict(
+      subjectType === "product" ? "This product already has an open verification for that form" : "This supplier already has an open verification for that form"
+    );
   }
 
   const definition = definitionOf(version, form);
   const evaluated = evaluateRules({ definition, values: {} });
   const item = await VerificationCase.create({
     leadId: lead._id,
+    subjectType,
+    subjectId: subjectType === "product" ? product._id : lead._id,
+    productId: product?._id || null,
     formId: form._id,
     versionId: version._id,
     title: payload.title || form.name,
@@ -611,14 +734,15 @@ async function create(payload, actor, req) {
     leadNote: payload.note || "",
   });
   await upsertDocuments(item, version, evaluated.derived, evaluated.values, actor);
-  await recomputeLeadRollup(lead._id);
+  if (product) await productService.markInVerification(product._id);
+  await syncRollups(item);
 
   const recipients = [assignedToId, lead.ownerId].filter((id) => String(id) !== String(actor._id));
   await notifyUsers(recipients, {
     type: "verification_assigned",
     title: `Verification assigned: ${item.title}`,
-    body: `${lead.name} needs ${item.title}.`,
-    data: { caseId: String(item._id), leadId: String(lead._id) },
+    body: `${product ? product.name : lead.name} needs ${item.title}.`,
+    data: { caseId: String(item._id), leadId: String(lead._id), productId: product ? String(product._id) : null },
   });
   await auditService.log({
     actor,
@@ -627,9 +751,9 @@ async function create(payload, actor, req) {
     resourceType: "VerificationCase",
     resourceId: item._id,
     req,
-    metadata: { leadId: String(lead._id), formId: String(form._id), assignedToId: String(assignedToId) },
+    metadata: { leadId: String(lead._id), productId: product ? String(product._id) : null, formId: String(form._id), assignedToId: String(assignedToId) },
   });
-  return hydrate(item, { form, version, lead });
+  return hydrate(item, { form, version, lead, product });
 }
 
 async function getById(id, req) {
@@ -671,7 +795,7 @@ async function saveDraft(id, payload, actor, req) {
   }
   await item.save();
   await upsertDocuments(item, version, evaluated.derived, evaluated.values, actor);
-  await recomputeLeadRollup(item.leadId);
+  await syncRollups(item);
   return hydrate(item, { form, version });
 }
 
@@ -733,7 +857,7 @@ async function submit(id, payload, actor, req) {
   item.reviews.push({ action: "submitted", note: "", actorId: actor._id, createdAt: item.submittedAt });
   await item.save();
   await refreshCaseStatus(item, refreshed);
-  await recomputeLeadRollup(item.leadId);
+  await syncRollups(item);
 
   const lead = await Lead.findById(item.leadId).select("name ownerId").lean();
   await notifyUsers([item.createdBy, lead?.ownerId].filter((id) => String(id) !== String(actor._id)), {
@@ -790,7 +914,7 @@ async function cancel(id, payload, actor, req) {
   item.status = "cancelled";
   if (payload?.note) item.reviewNote = payload.note;
   await item.save();
-  await recomputeLeadRollup(item.leadId);
+  await syncRollups(item);
   await auditService.log({
     actor,
     action: "cancel",
@@ -826,7 +950,7 @@ async function updateDocument(id, payload, actor, req) {
     await item.save();
   }
   await doc.save();
-  await recomputeLeadRollup(item.leadId);
+  await syncRollups(item);
   return { document: serializeDocument(doc), case: await hydrate(item) };
 }
 
@@ -906,7 +1030,7 @@ async function reviewCase(id, payload, actor, req) {
   item.reviews = item.reviews || [];
   item.reviews.push({ action: decision, note, actorId: actor._id, createdAt: new Date() });
   await item.save();
-  await recomputeLeadRollup(item.leadId);
+  await syncRollups(item);
 
   const lead = await Lead.findById(item.leadId).select("name ownerId").lean();
   const recipients = [item.assignedToId, item.createdBy, lead?.ownerId].filter((id) => String(id) !== String(actor._id));
@@ -941,12 +1065,12 @@ async function summaryForLead(leadId, req) {
   const lead = await Lead.findOne(notDeleted({ _id: leadId })).lean();
   if (!lead) throw ApiError.notFound("Lead not found");
   if (!actorCan(req, "verification.view") && !actorCan(req, "leads.view")) throw ApiError.forbidden();
-  const cases = await VerificationCase.find(notDeleted({ leadId }))
+  const cases = await VerificationCase.find(notDeleted({ leadId, subjectType: { $ne: "product" } }))
     .populate("assignedToId", "name email avatarUrl")
     .populate("formId", "name purpose")
     .sort({ createdAt: -1 })
     .lean();
-  const documents = await VerificationDocument.find(notDeleted({ leadId })).sort({ createdAt: 1 });
+  const documents = await VerificationDocument.find(notDeleted({ leadId, productId: null })).sort({ createdAt: 1 });
   const grouped = {};
   for (const doc of documents) {
     const key = String(doc.caseId);
@@ -957,6 +1081,43 @@ async function summaryForLead(leadId, req) {
     lead: serializeLeadRef(lead),
     status: lead.verificationStatus || "none",
     summary: lead.verificationSummary || { required: 0, verified: 0, pending: 0, expired: 0, expiringSoon: 0 },
+    cases: cases.map((item) =>
+      serializeCase(item, {
+        assignedTo: serializePerson(item.assignedToId),
+        form: item.formId ? { id: String(item.formId._id), name: item.formId.name, purpose: item.formId.purpose } : null,
+        documentCounts: documentCounts(grouped[String(item._id)] || []),
+      })
+    ),
+    documents: documents.map(serializeDocument),
+  };
+}
+
+async function summaryForProduct(productId, req) {
+  const product = await Product.findOne(notDeleted({ _id: productId })).lean();
+  if (!product) throw ApiError.notFound("Product not found");
+  if (!actorCan(req, "verification.view") && !actorCan(req, "products.view")) throw ApiError.forbidden();
+  const cases = await VerificationCase.find(notDeleted({ productId }))
+    .populate("assignedToId", "name email avatarUrl")
+    .populate("formId", "name purpose")
+    .sort({ createdAt: -1 })
+    .lean();
+  const documents = await VerificationDocument.find(notDeleted({ productId })).sort({ createdAt: 1 });
+  const grouped = {};
+  for (const doc of documents) {
+    const key = String(doc.caseId);
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(doc);
+  }
+  return {
+    product: {
+      id: String(product._id),
+      name: product.name,
+      sku: product.sku || "",
+      listingStatus: product.listingStatus,
+      verificationStatus: product.verificationStatus || "none",
+    },
+    status: product.verificationStatus || "none",
+    summary: product.verificationSummary || { required: 0, verified: 0, pending: 0, expired: 0, expiringSoon: 0 },
     cases: cases.map((item) =>
       serializeCase(item, {
         assignedTo: serializePerson(item.assignedToId),
@@ -982,7 +1143,10 @@ module.exports = {
   reviewDocument,
   reviewCase,
   summaryForLead,
+  summaryForProduct,
   recomputeLeadRollup,
+  recomputeProductRollup,
+  syncRollups,
   startOfDay,
   addDays,
   documentCounts,

@@ -1,6 +1,6 @@
 const FORM_STATUSES = ["draft", "published", "archived"];
 const VERSION_STATUSES = ["draft", "published", "archived"];
-const FORM_PURPOSES = ["general", "supplier_onboarding", "distributor_onboarding", "supplier_verification"];
+const FORM_PURPOSES = ["general", "supplier_onboarding", "distributor_onboarding", "supplier_verification", "product_verification"];
 const ONBOARDING_SUBJECT_TYPES = ["lead", "buyer"];
 const SUBMISSION_STATUSES = ["draft", "submitted", "approved", "rejected"];
 const OPEN_SUBMISSION_STATUSES = ["draft", "submitted"];

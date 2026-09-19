@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Building2, Pencil } from "lucide-react";
 import { exportService } from "@/services/exportService";
 import { OnboardingPanel } from "@/components/onboarding/OnboardingPanel";
+import { DistributorProductsPanel } from "@/components/products/DistributorProductsPanel";
 import { useAuth } from "@/contexts/AuthProvider";
 import { useToast } from "@/contexts/ToastProvider";
 import { Button } from "@/components/ui/Button";
@@ -137,6 +138,8 @@ export function BuyerDetail({ buyerId }) {
               ) : null}
             </CardBody>
           </Card>
+
+          <DistributorProductsPanel buyerId={buyerId} />
 
           <OnboardingPanel
             subjectType="buyer"
