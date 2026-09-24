@@ -463,7 +463,7 @@ export function LeadDetail({ leadId, variant = "sourcing" }) {
             <Card>
               <CardBody className="flex items-center gap-2.5 py-4 text-sm text-muted">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
-                Nothing due — you're caught up on this {isDirectory ? "supplier" : "lead"}.
+                Nothing due — you are caught up on this {isDirectory ? "supplier" : "lead"}.
               </CardBody>
             </Card>
           )}
