@@ -45,7 +45,25 @@ npm run dev
 
 Default Super Admin (from `.env`): `admin@example.com` / `ChangeMeNow!23`
 
-In development the Next.js app rewrites `/api/*` to `http://localhost:5000/api/*` so session cookies stay first-party.
+In development the Next.js app rewrites `/api/*` to `http://127.0.0.1:5000/api/*` so session cookies stay first-party.
+
+## Production (Dokploy)
+
+Use [`docker-compose.prod.yml`](docker-compose.prod.yml). Dokploy’s Traefik terminates TLS; this compose does not run Traefik or publish host ports.
+
+1. Create a Compose app in Dokploy pointing at this repo. Set the compose file to `docker-compose.prod.yml`.
+2. Copy [`.env.production.example`](.env.production.example) into Dokploy environment variables (or an env file). Set `APP_URL` to your public HTTPS URL and fill Mongo, cookie, SMTP, Cloudinary, and superadmin values.
+3. Ensure the external Docker network `dokploy-network` exists on the VPS (Dokploy creates it).
+4. Attach one HTTPS domain to the **frontend** service, container port **3000**. Do not expose `5000` or `27017`.
+5. After the first successful deploy, seed once:
+
+```bash
+docker compose -f docker-compose.prod.yml exec backend npm run seed
+```
+
+Traffic path: Browser → Traefik → frontend:3000 → rewrite `/api` → backend:5000 → mongo.
+
+Local Mongo + Mailhog still use [`docker-compose.yml`](docker-compose.yml).
 
 ## Documentation
 

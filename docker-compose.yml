@@ -13,7 +13,9 @@ services:
       - "8025:8025"
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     ports:
       - "5000:5000"
     env_file:

@@ -1,0 +1,15 @@
+.git
+**/.git
+**/node_modules
+**/.next
+**/.env
+**/.env.*
+!**/.env.production.example
+coverage
+**/*.log
+test-results
+playwright-report
+docs
+agent-transcripts
+*.md
+!README.md
