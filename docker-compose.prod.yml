@@ -9,7 +9,7 @@ services:
     volumes:
       - mongo_data:/data/db
     networks:
-      - internal
+      - dokploy-network
     healthcheck:
       test:
         [
@@ -30,11 +30,15 @@ services:
       retries: 10
       start_period: 20s
 
-  backend:
+  # Named nesmee-api to avoid DNS collisions on the shared dokploy-network
+  # (generic "backend" can resolve to another project).
+  nesmee-api:
     build:
       context: .
       dockerfile: backend/Dockerfile
     restart: unless-stopped
+    expose:
+      - "5000"
     environment:
       NODE_ENV: production
       PORT: 5000
@@ -72,14 +76,14 @@ services:
       mongo:
         condition: service_healthy
     networks:
-      - internal
+      - dokploy-network
 
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        API_INTERNAL_URL: http://backend:5000
+        API_INTERNAL_URL: http://nesmee-api:5000
         NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-Nesmee EOS}
         NEXT_PUBLIC_APP_TAGLINE: ${NEXT_PUBLIC_APP_TAGLINE:-Export operating system}
         NEXT_PUBLIC_APP_SHORT_TAGLINE: ${NEXT_PUBLIC_APP_SHORT_TAGLINE:-Export OS}
@@ -87,18 +91,15 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: production
-      API_INTERNAL_URL: http://backend:5000
+      API_INTERNAL_URL: http://nesmee-api:5000
     depends_on:
-      - backend
+      - nesmee-api
     networks:
-      - internal
       - dokploy-network
 
 volumes:
   mongo_data:
 
 networks:
-  internal:
-    driver: bridge
   dokploy-network:
     external: true

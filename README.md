@@ -54,14 +54,14 @@ Use [`docker-compose.prod.yml`](docker-compose.prod.yml). Dokploy’s Traefik te
 1. Create a Compose app in Dokploy pointing at this repo. Set the compose file to `docker-compose.prod.yml`.
 2. Copy [`.env.production.example`](.env.production.example) into Dokploy environment variables (or an env file). Set `APP_URL` to your public HTTPS URL and fill Mongo, cookie, SMTP, Cloudinary, and superadmin values.
 3. Ensure the external Docker network `dokploy-network` exists on the VPS (Dokploy creates it).
-4. Attach one HTTPS domain to the **frontend** service, container port **3000**. Do not expose `5000` or `27017`.
+4. Attach one HTTPS domain to the **frontend** service, container port **3000**. Do not expose `5000` or `27017`. Do not attach a domain to `nesmee-api` or `mongo`.
 5. After the first successful deploy, seed once:
 
 ```bash
-docker compose -f docker-compose.prod.yml exec backend npm run seed
+docker compose -f docker-compose.prod.yml exec nesmee-api npm run seed
 ```
 
-Traffic path: Browser → Traefik → frontend:3000 → rewrite `/api` → backend:5000 → mongo.
+Traffic path: Browser → Traefik → frontend:3000 → rewrite `/api` → nesmee-api:5000 → mongo.
 
 Local Mongo + Mailhog still use [`docker-compose.yml`](docker-compose.yml).
 
